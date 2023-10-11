@@ -1,5 +1,16 @@
-.cleanLinks {
-  text-decoration: none;
+.profileLabel {
+  padding: 3px 10px 3px 10px;
+  font-weight: bold;
+  background-color: blue;
+  color: white;
+  border-top: solid;
+  border-bottom: solid;
+  border-color: white;
+  border-collapse: collapse;;
+}
+
+.profileValue {
+  text-align: left
 }
 
 .App {

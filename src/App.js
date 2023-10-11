@@ -1,6 +1,5 @@
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import CardGroup from 'react-bootstrap/CardGroup';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
@@ -21,36 +20,24 @@ class App extends Component {
         <p>
           <h1>Craps</h1>
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
       <body>
         <Row xs={1} md={4}>
           <Col>
-            <a href="/profile" className="cleanLinks">
-              <Card>
-                <Card.Body>
-                  <Card.Title>Profile</Card.Title>
-                  <Card.Text>Manage your user profile and view your betting history</Card.Text>
-                </Card.Body>
-              </Card>
-            </a>
+            <Card>
+              <Card.Body>
+                <Card.Title><Button variant="primary" href="/profile">Profile</Button></Card.Title>
+                <Card.Text>Manage your user profile and view your betting history</Card.Text>
+              </Card.Body>
+            </Card>
           </Col>
           <Col>
-            <a href="/solo" className="cleanLinks">
-              <Card>
-                <Card.Body>
-                <Card.Title>Single Player</Card.Title>
-                <Card.Text>Play a round of craps solo</Card.Text>
-                </Card.Body>
-              </Card>
-            </a>
+            <Card>
+              <Card.Body>
+              <Card.Title><Button variant="primary" href="/solo">Single Player</Button></Card.Title>
+              <Card.Text>Play a round of craps solo</Card.Text>
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
       </body>

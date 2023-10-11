@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import Profile from './Profile';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/profile",
-    element: <div>Hello Profile World!</div>
+    element: <Profile />
   },
   {
     path: "/solo",
