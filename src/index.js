@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import Profile from './Profile';
+import Solo from './Solo';
+import SoloStore from './SoloStore';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -20,7 +22,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/solo",
-    element: <div>Hello Solo World!</div>
+    element: <Solo store={SoloStore}/>
   }
 ]);
 

@@ -33,12 +33,9 @@ class Profile extends Component {
           <p><h1>Craps</h1></p>
           <p><h2>Profile</h2></p>
         </header>
-        <body>
-          <Container>
-              {profileDataElements}
-          </Container>
-
-        </body>
+        <Container>
+            {profileDataElements}
+        </Container>
       </div>
     );
   }
