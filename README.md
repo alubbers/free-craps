@@ -1,2 +1,2 @@
 # free-craps
-Paymentless craps for fun and learning
+Paymentless craps for fun
