@@ -22,7 +22,7 @@ class App extends Component {
               <Card>
                 <Card.Body>
                   <Card.Title><Button variant="primary" href="/profile">Profile</Button></Card.Title>
-                  <Card.Text>Manage your user profile and view your betting history</Card.Text>
+                  <Card.Text>Manage your user profile and view your game history</Card.Text>
                 </Card.Body>
               </Card>
             </Col>
