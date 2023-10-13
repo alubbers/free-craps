@@ -7,6 +7,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "babel-preset-react-native": "^4.0.1",
+    "@babel/plugin-proposal-private-property-in-object": "~7.21.11",
     "mobx-react": "^9.0.1",
     "mobx-react-lite": "^4.0.5",
     "mobx-utils": "^6.0.8",
@@ -19,8 +20,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.2",
-    "@babel/plugin-proposal-decorators": "^7.23.2",
-    "@babel/plugin-proposal-private-property-in-object": "~7.21.11"
+    "@babel/plugin-proposal-decorators": "^7.23.2"
   },
   "scripts": {
     "start": "react-scripts start",
