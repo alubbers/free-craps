@@ -1,3 +1,4 @@
+import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
@@ -42,13 +43,46 @@ class SoloView extends Component {
 
     if (this.props.gameStarted) {
       const rollRows = this.props.currentGame.rolls.map( (e, index) => {
-        return <ListGroup.Item key={index} variant="success">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</ListGroup.Item>;
+        let details = [];
+
+        if (e.crapsMeta.craps) {
+          details.push(<Alert variant="danger">Craps! Pass Line loses</Alert>);
+        }
+        else {
+          if (e.crapsMeta.passLineWin) {
+            details.push(<Alert variant="info">Pass Line Winner!</Alert>);
+          }
+          else {
+            if (e.crapsMeta.pointState === "POINT_SET") {
+              details.push(<Alert variant="primary">New Point Set</Alert>);
+            }
+
+            if (e.crapsMeta.pointState === "POINT_HIT") {
+              details.push(<Alert variant="success">Point Hit!! Pass Line Winner!!</Alert>);
+            }
+
+            if (e.crapsMeta.pointState === "LINE_AWAY") {
+              details.push(<Alert variant="danger">Seven Line Away ...</Alert>);
+            }
+          }
+
+          if (e.crapsMeta.hardWay) {
+            details.push(<Alert variant="secondary">Roll is a hard way!</Alert>);
+          }
+        }
+
+        return <>
+            <Alert variant="dark">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</Alert>
+            {details}
+            <div>&nbsp;</div>
+          </>;
       });
 
       currentActivity = (
         <>
           <h3>Current Game</h3>
           <p>Started on {this.props.currentGame.when}</p>
+          <p>Current point: {this.props.currentGame.point === 0 ? "Off" : this.props.currentGame.point}</p>
 
           <Row>
             <Col>
@@ -65,9 +99,7 @@ class SoloView extends Component {
           </Row>
           <Row>
             <Col>
-              <ListGroup>
-                {rollRows}
-              </ListGroup>
+              {rollRows}
             </Col>
           </Row>
         </>

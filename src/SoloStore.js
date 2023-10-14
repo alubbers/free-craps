@@ -1,4 +1,6 @@
-import { makeAutoObservable } from "mobx"
+import { makeAutoObservable } from "mobx";
+
+import RollUtils from "./RollUtils";
 
 class SoloStore {
 
@@ -32,7 +34,8 @@ class SoloStore {
     this.currentGame = {
       when: "10/11/2023 " + new Date().getTime() % 100,
       rolls: [],
-      rollCount: 0
+      rollCount: 0,
+      point: 0
     };
 
     this.games.push(this.currentGame);
@@ -50,21 +53,19 @@ class SoloStore {
       throw "Cannot perform a roll when a game isn't started";
     }
 
-    const alphaDie = Math.ceil(Math.random() * 6);
-    const betaDie = Math.ceil(Math.random() * 6);
-    const rollTotal = alphaDie + betaDie;
-
     const bets = [];
+    const rollResult = RollUtils.roll2d6();
+    const crapsResult = RollUtils.buildCrapsResult(rollResult, this.currentGame.point);
 
-    // FIXME TODO Still need to handle the point, probably need to do this in a util somewhere
     this.currentGame.rolls.push({
-      roll: {
-        a: alphaDie,
-        b: betaDie,
-        total: rollTotal
-      },
+      roll: rollResult,
+      crapsMeta: crapsResult,
       activeBets: bets
     });
+
+    if (crapsResult.newPoint !== -1) {
+      this.currentGame.point = crapsResult.newPoint;
+    }
 
     this.currentGame.rollCount++;
 
