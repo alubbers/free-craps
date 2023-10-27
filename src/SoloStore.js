@@ -16,14 +16,6 @@ class SoloStore {
     makeAutoObservable(this);
   }
 
-  unreadyTest() {
-    this.ready = false;
-  }
-
-  readyTest() {
-    this.ready = true;
-  }
-
   startNewGame() {
     this.ready = false;
 
@@ -32,7 +24,7 @@ class SoloStore {
     }
 
     this.currentGame = {
-      when: "10/11/2023 " + new Date().getTime() % 100,
+      when: new Date(),
       rolls: [],
       rollCount: 0,
       point: 0
@@ -50,7 +42,7 @@ class SoloStore {
 
     // don't roll if there is no game started
     if (!this.currentGame) {
-      throw "Cannot perform a roll when a game isn't started";
+      throw new Error("Cannot perform a roll when a game isn't started");
     }
 
     const bets = [];

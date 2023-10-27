@@ -1,3 +1,16 @@
+.placeBetCell {
+  padding: 1em;
+}
+
+.crapsTable {
+  margin: 10px 0px 10px 0px;
+}
+
+.crapsTableCell {
+  background-color: green;
+  padding: 4px 0px 4px 0px;
+}
+
 .profileLabel {
   padding: 3px 10px 3px 10px;
   font-weight: bold;

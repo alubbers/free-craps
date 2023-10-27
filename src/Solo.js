@@ -6,6 +6,7 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
+import CrapsTable from './CrapsTable';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { observer } from "mobx-react"
 
@@ -79,10 +80,13 @@ class SoloView extends Component {
           </>;
       });
 
+      const startedDate = this.props.currentGame.when;
+      const startedDisplay = `${startedDate.getMonth() + 1}/${startedDate.getDate()}/${startedDate.getFullYear()}`;
+
       currentActivity = (
         <>
           <h3>Current Game</h3>
-          <p>Started on {this.props.currentGame.when}</p>
+          <h6>Started on {startedDisplay}</h6>
           <p>Current point: {this.props.currentGame.point === 0 ? "Off" : this.props.currentGame.point}</p>
 
           <Row>
@@ -98,6 +102,7 @@ class SoloView extends Component {
               {newGameCard}
             </Col>
           </Row>
+          <CrapsTable currentGame={this.props.currentGame}/>
           <Row>
             <Col>
               {rollRows}
