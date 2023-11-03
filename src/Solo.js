@@ -33,12 +33,7 @@ class SoloView extends Component {
   }
 
   buildActiveBody() {
-    const newGameCard = <Card>
-      <Card.Body>
-        <Card.Title><Button variant="primary" onClick={() => this.startNewGame()}>Start New Game</Button></Card.Title>
-        <Card.Text>Start a New Game</Card.Text>
-      </Card.Body>
-    </Card>;
+    const newGame = <Button variant="primary" onClick={() => this.startNewGame()}>Start New Game</Button>;
 
     let currentActivity;
 
@@ -85,21 +80,12 @@ class SoloView extends Component {
 
       currentActivity = (
         <>
-          <h3>Current Game</h3>
-          <h6>Started on {startedDisplay}</h6>
-          <p>Current point: {this.props.currentGame.point === 0 ? "Off" : this.props.currentGame.point}</p>
-
           <Row>
             <Col>
-              <Card>
-                <Card.Body>
-                  <Card.Title><Button variant="primary" onClick={() => this.rollDice()}>Roll Dice</Button></Card.Title>
-                  <Card.Text>Roll 'em!</Card.Text>
-                </Card.Body>
-              </Card>
+              <Button variant="primary" onClick={() => this.rollDice()}>Roll Dice</Button>
             </Col>
             <Col>
-              {newGameCard}
+              {newGame}
             </Col>
           </Row>
           <CrapsTable currentGame={this.props.currentGame}/>
@@ -112,7 +98,7 @@ class SoloView extends Component {
       );
     }
     else {
-      currentActivity = newGameCard;
+      currentActivity = newGame;
     }
 
     return (
@@ -125,12 +111,7 @@ class SoloView extends Component {
   render() {
 
     return <div className="App">
-      <header className="App-header">
-        <div>
-          <h1>Craps</h1>
-          <h2>Single Player</h2>
-        </div>
-      </header>
+      <div>Single Player</div>
       <div>
         <IdlingComponent active={this.props.storeReady} activeComponentBuilder={() => this.buildActiveBody()} />
       </div>
