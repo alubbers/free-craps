@@ -1,5 +1,12 @@
+export const POINT_STATES = {
+  noChange: "NO_CHANGE",
+  pointSet: "POINT_SET",
+  pointHit: "POINT_HIT",
+  lineAway: "LINE_AWAY"
+}
 
-class RollUtils {
+
+export class RollUtils {
 
   roll2d6() {
     const alphaDie = Math.ceil(Math.random() * 6);
@@ -33,7 +40,7 @@ class RollUtils {
       craps: false,
       passLineWin: false,
       hardWay: false,
-      pointState: "NO_CHANGE",
+      pointState: POINT_STATES.noChange,
       newPoint: -1
     };
 
@@ -45,23 +52,23 @@ class RollUtils {
         result.passLineWin = true;
       }
       else {
-        result.pointState = "POINT_SET";
+        result.pointState = POINT_STATES.pointSet;
         result.newPoint = roll.total;
       }
     }
     else {
       if (roll.total === point) {
-        result.pointState = "POINT_HIT";
+        result.pointState = POINT_STATES.pointHit;
         result.newPoint = 0;
       }
       else if (roll.total === 7) {
-        result.pointState = "LINE_AWAY";
+        result.pointState = POINT_STATES.lineAway;
         result.newPoint = 0;
       }
     }
 
     // check the hard ways, they are independent of the point
-    if (roll.total == 4 || roll.total == 6 || roll.total == 8 || roll.total == 10) {
+    if (roll.total === 4 || roll.total === 6 || roll.total === 8 || roll.total === 10) {
       result.hardWay = roll.a === roll.b;
     }
 
@@ -69,5 +76,3 @@ class RollUtils {
   }
 
 }
-
-export default new RollUtils();

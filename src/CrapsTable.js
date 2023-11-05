@@ -6,7 +6,8 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 
 import IdlingComponent from './IdlingComponent';
-import CrapsTableStore from './CrapsTableStore';
+import {ANY_CRAPS, C_AND_E, FIELD_VALUES, CrapsTableStore} from './CrapsTableStore';
+import {POINT_STATES, RollUtils} from './RollUtils';
 
 import logo from './logo.svg';
 import './App.css';
@@ -19,60 +20,114 @@ class CrapsTable extends Component {
     this.store = new CrapsTableStore();
   }
 
-  buildKeyedVariants() {
+  buildMappedVariants() {
 
-    let placeVariants = this.store.betBuckets.filter( e => e.type === 'place').map((e) => {
-      let variant = "";
-      if (this.props.currentGame && this.props.currentGame.rolls.length > 0) {
-        const lastRoll = this.props.currentGame.rolls.toReversed()[0];
-        if (lastRoll.roll.total + '' === e.value) {
-          if (lastRoll.crapsMeta.pointState === "POINT_SET") {
-            variant = "outline-dark";
+    let results = this.store.betBuckets.map((e) => {return { key: e.code, variant: "success"};});
+
+    if (this.props.currentGame && this.props.currentGame.rolls.length >= 1) {
+      const lastRoll = this.props.currentGame.rolls.toReversed()[0];
+
+      const lastTotal = lastRoll.roll.total;
+
+      results = this.store.betBuckets.map((e) => {
+        let variant = "success";
+
+        if (e.type === 'place') {
+          if (lastTotal + '' === e.value) {
+            if (lastRoll.crapsMeta.pointState === "POINT_SET") {
+              variant = "outline-dark";
+            }
+            else if (lastRoll.crapsMeta.pointState === "POINT_HIT") {
+              variant = "outline-success";
+            }
+            else {
+              variant = "outline-primary";
+            }
           }
-          else if (lastRoll.crapsMeta.pointState === "POINT_HIT") {
-            variant = "outline-success";
-          }
-          else {
-            variant = "outline-primary"
+          else if (this.props.currentGame.point + '' === e.value) {
+            variant = "dark";
           }
         }
-        else if (this.props.currentGame.point + '' === e.value) {
-          variant = "dark";
+        else if (e.type === 'pass') {
+          if (e.code === 'dontPass') {
+            if (lastRoll.crapsMeta.craps) {
+              variant = "outline-primary";
+
+              // Don't pass pushes on 12 when point isn't set
+              if (lastTotal === 12) {
+                variant = "outline-secondary";
+              }
+            }
+
+            if (lastRoll.crapsMeta.pointState === POINT_STATES.lineAway) {
+              variant = "outline-primary";
+            }
+          }
+
+          if (e.code === 'pass') {
+            if (lastRoll.crapsMeta.passLineWin) {
+              variant = "outline-primary";
+            }
+
+            if (lastRoll.crapsMeta.pointState === POINT_STATES.pointHit) {
+              variant = "outline-primary";
+            }
+          }
         }
-      }
+        else if (e.type === 'hardWay') {
+          if (lastTotal + '' === e.value) {
+            if (lastRoll.crapsMeta.hardWay) {
+              variant = "outline-primary";
+            }
+            else {
+              variant = "outline-danger";
+            }
+          }
+        }
+        else if (e.type === 'horn') {
+          if (lastTotal + '' === e.value) {
+            variant = "outline-primary";
+          }
+        }
+        else if (e.type === 'anySeven') {
+          if (lastTotal === 7) {
+            variant = "outline-primary";
+          }
+        }
+        else if (e.type === 'anyCraps') {
+          if (ANY_CRAPS.includes(lastTotal)) {
+            variant = "outline-primary";
+          }
+        }
+        else if (e.type === 'c-and-e') {
+          if (C_AND_E.includes(lastTotal)) {
+            variant = "outline-primary";
+          }
+        }
+        else if (e.type === 'field') {
+          if (FIELD_VALUES.includes(lastTotal)) {
+            variant = "outline-primary";
+          }
+        }
 
-      return {
-        key: `place-${e.value}`,
-        variant: variant
-      }
+        return {
+          key: e.code,
+          variant: variant
+        };
+      });
+    }
 
-      // FIXME TODO the rest
+    let mappedVariants = {};
 
-    });
+    results.forEach(e => mappedVariants[e.key] = e.variant);
 
+    return mappedVariants;
   }
 
-  buildPlaceBetComponents() {
+  buildPlaceBetComponents(mappedVariants) {
+
     let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place').map((e) => {
-      let variant = "success";
-      if (this.props.currentGame && this.props.currentGame.rolls.length > 0) {
-        const lastRoll = this.props.currentGame.rolls.toReversed()[0];
-        if (lastRoll.roll.total + '' === e.value) {
-          if (lastRoll.crapsMeta.pointState === "POINT_SET") {
-            variant = "outline-dark";
-          }
-          else if (lastRoll.crapsMeta.pointState === "POINT_HIT") {
-            variant = "outline-success";
-          }
-          else {
-            variant = "outline-primary"
-          }
-        }
-        else if (this.props.currentGame.point + '' === e.value) {
-          variant = "dark";
-        }
-      }
-      return (<Button style={{fontSize: "x-large"}} variant={variant} >{e.value}</Button>);
+      return (<Button key={e.code} style={{fontSize: "x-large"}} variant={mappedVariants[e.code]} >{e.value}</Button>);
     });
 
     let setTwoBuckets = [];
@@ -91,9 +146,14 @@ class CrapsTable extends Component {
 
   buildActiveBody() {
 
-    const variantByKey = this.buildKeyedVariants();
+    let mappedVariants = this.buildMappedVariants();
 
-    const placeBetButtonGroups = this.buildPlaceBetComponents();
+    const placeBetButtonGroups = this.buildPlaceBetComponents(mappedVariants);
+
+    let fieldTextColor = "yellow";
+    if (mappedVariants["field"] === "outline-primary") {
+      fieldTextColor = "#cccc00";
+    }
 
     const component = <>
         <Row xs="3" className="crapsTable">
@@ -114,20 +174,20 @@ class CrapsTable extends Component {
               <Col xs="12">
                 <div style={{width: "1%", float: "left"}}>H A R D</div>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  <Button variant="success">4</Button>
-                  <Button variant="success">8</Button>
+                  <Button variant={mappedVariants["hardWay-4"]}>4</Button>
+                  <Button variant={mappedVariants["hardWay-8"]}>8</Button>
                 </ButtonGroup>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  <Button variant="success">6</Button>
-                  <Button variant="success">10</Button>
+                  <Button variant={mappedVariants["hardWay-6"]}>6</Button>
+                  <Button variant={mappedVariants["hardWay-10"]}>10</Button>
                 </ButtonGroup>
               </Col>
             </Row>
             <Row>
               <Col xs="12">
                 <ButtonGroup>
-                  <Button variant="success" style={{width: "100%"}}>C&amp;E</Button>
-                  <Button variant="success" style={{width: "100%"}}>7</Button>
+                  <Button variant={mappedVariants["c-and-e"]} style={{width: "100%"}}>C&amp;E</Button>
+                  <Button variant={mappedVariants["anySeven"]} style={{width: "100%"}}>7</Button>
                 </ButtonGroup>
               </Col>
             </Row>
@@ -137,14 +197,14 @@ class CrapsTable extends Component {
           <Col xs="7">
             <Row>
               <Col>
-                <Button style={{width: "100%", color: "yellow"}} variant="success">Field</Button>
+                <Button style={{width: "100%", color: "#cccc00"}} variant={mappedVariants["field"]}>Field</Button>
               </Col>
             </Row>
             <Row>
               <Col xs="12">
                 <ButtonGroup style={{width: "100%"}}>
-                  <Button style={{width: "100%"}} variant="success">Pass</Button>
-                  <Button style={{width: "100%", color: "black"}} variant="success">No Pass</Button>
+                  <Button style={{width: "100%"}} variant={mappedVariants["pass"]}>Pass</Button>
+                  <Button style={{width: "100%", color: "black"}} variant={mappedVariants["dontPass"]}>No Pass</Button>
                 </ButtonGroup>
               </Col>
             </Row>
@@ -152,12 +212,12 @@ class CrapsTable extends Component {
           <Col xs="5">
             <div style={{width: "1%", float: "left"}}>H O R N</div>
             <ButtonGroup vertical style={{ height: "100%"}}>
-              <Button variant="success">2</Button>
-              <Button variant="success">11</Button>
+              <Button variant={mappedVariants["horn-2"]}>2</Button>
+              <Button variant={mappedVariants["horn-11"]}>11</Button>
             </ButtonGroup>
             <ButtonGroup vertical style={{ height: "100%"}}>
-              <Button variant="success">3</Button>
-              <Button variant="success">12</Button>
+              <Button variant={mappedVariants["horn-3"]}>3</Button>
+              <Button variant={mappedVariants["horn-12"]}>12</Button>
             </ButtonGroup>
           </Col>
         </Row>

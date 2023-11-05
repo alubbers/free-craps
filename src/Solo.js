@@ -43,33 +43,33 @@ class SoloView extends Component {
         let details = [];
 
         if (e.crapsMeta.craps) {
-          details.push(<Alert variant="danger">Craps! Pass Line loses</Alert>);
+          details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger">Craps! Pass Line loses</Alert>);
         }
         else {
           if (e.crapsMeta.passLineWin) {
-            details.push(<Alert variant="info">Pass Line Winner!</Alert>);
+            details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="info">Pass Line Winner!</Alert>);
           }
           else {
             if (e.crapsMeta.pointState === "POINT_SET") {
-              details.push(<Alert variant="primary">New Point Set</Alert>);
+              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="primary">New Point Set</Alert>);
             }
 
             if (e.crapsMeta.pointState === "POINT_HIT") {
-              details.push(<Alert variant="success">Point Hit!! Pass Line Winner!!</Alert>);
+              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="success">Point Hit!! Pass Line Winner!!</Alert>);
             }
 
             if (e.crapsMeta.pointState === "LINE_AWAY") {
-              details.push(<Alert variant="danger">Seven Line Away ...</Alert>);
+              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger">Seven Line Away ...</Alert>);
             }
           }
 
           if (e.crapsMeta.hardWay) {
-            details.push(<Alert variant="secondary">Roll is a hard way!</Alert>);
+            details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="secondary">Roll is a hard way!</Alert>);
           }
         }
 
         return <>
-            <Alert variant="dark">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</Alert>
+            <Alert key={`roll-${index}-basic`} variant="dark">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</Alert>
             {details}
             <div>&nbsp;</div>
           </>;
@@ -98,14 +98,10 @@ class SoloView extends Component {
       );
     }
     else {
-      currentActivity = newGame;
+      currentActivity = <div>{newGame}</div>;
     }
 
-    return (
-      <Row xs={1}>
-        <Col>{currentActivity}</Col>
-      </Row>
-    );
+    return currentActivity;
   }
 
   render() {

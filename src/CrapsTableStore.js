@@ -1,11 +1,11 @@
-const PLACE_BETS = [4, 5, 6, 8, 9, 10];
-const HARD_WAYS = [4, 6, 8, 10];
-const HORN_BETS = [2, 3, 11, 12];
-const ANY_CRAPS = [2, 3, 12];
-const C_AND_E = [2, 3, 11, 12];
-const FIELD_VALUES = [2, 3, 4, 9, 10, 11, 12]
+export const PLACE_BETS = [4, 5, 6, 8, 9, 10];
+export const HARD_WAYS = [4, 6, 8, 10];
+export const HORN_BETS = [2, 3, 11, 12];
+export const ANY_CRAPS = [2, 3, 12];
+export const C_AND_E = [2, 3, 11, 12];
+export const FIELD_VALUES = [2, 3, 4, 9, 10, 11, 12]
 
-class CrapsTableStore {
+export class CrapsTableStore {
 
   betBuckets = [];
 
@@ -84,5 +84,3 @@ class CrapsTableStore {
   }
 
 }
-
-export default CrapsTableStore;

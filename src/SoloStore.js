@@ -1,6 +1,8 @@
 import { makeAutoObservable } from "mobx";
 
-import RollUtils from "./RollUtils";
+import { RollUtils } from "./RollUtils";
+
+const rollUtils = new RollUtils();
 
 class SoloStore {
 
@@ -46,8 +48,8 @@ class SoloStore {
     }
 
     const bets = [];
-    const rollResult = RollUtils.roll2d6();
-    const crapsResult = RollUtils.buildCrapsResult(rollResult, this.currentGame.point);
+    const rollResult = rollUtils.roll2d6();
+    const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
 
     this.currentGame.rolls.push({
       roll: rollResult,
