@@ -25,7 +25,7 @@ class CrapsTable extends Component {
     let results = this.store.betBuckets.map((e) => {return { key: e.code, variant: "success"};});
 
     if (this.props.currentGame && this.props.currentGame.rolls.length >= 1) {
-      const lastRoll = this.props.currentGame.rolls.toReversed()[0];
+      const lastRoll = this.props.currentGame.rolls.slice(-1)[0];
 
       const lastTotal = lastRoll.roll.total;
 

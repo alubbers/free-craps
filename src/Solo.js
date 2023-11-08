@@ -38,7 +38,9 @@ class SoloView extends Component {
     let currentActivity;
 
     if (this.props.gameStarted) {
-      const rollElementList = this.props.currentGame.rolls.toReversed();
+      let rollElementList = [].concat(this.props.currentGame.rolls);
+      rollElementList.reverse();
+
       const rollRows = rollElementList.map( (e, index) => {
         let details = [];
 
