@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTable from './CrapsTable';
+import BetsModal from './BetsModal';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { observer } from "mobx-react"
 
@@ -14,9 +15,11 @@ import './App.css';
 
 const Solo = observer(({ store }) =>
   <SoloView soloStore={store}
+            showBetsModal={store.isShowBetsModal()}
             gameStarted={store.gameStarted}
             storeReady={store.ready}
-            currentGame={store.currentGame} />);
+            currentGame={store.currentGame}
+            betHelper={store.betHelper} />);
 
 class SoloView extends Component {
 
@@ -32,8 +35,20 @@ class SoloView extends Component {
     this.store.startNewGame();
   }
 
+  showBetsModal() {
+    this.store.showBetsModal();
+  }
+
+  hideBetsModal() {
+    this.store.hideBetsModal();
+  }
+
+  betBucketClicked(code) {
+    alert("Hey! you hit bet bucket " + code);
+  }
+
   buildActiveBody() {
-    const newGame = <Button variant="primary" onClick={() => this.startNewGame()}>Start New Game</Button>;
+    const newGame = <Button variant="primary" onClick={() => this.startNewGame()}>New</Button>;
 
     let currentActivity;
 
@@ -84,13 +99,17 @@ class SoloView extends Component {
         <>
           <Row>
             <Col>
-              <Button variant="primary" onClick={() => this.rollDice()}>Roll Dice</Button>
+              <Button variant="primary" onClick={() => this.rollDice()}>Roll</Button>
+            </Col>
+            <Col>
+              <Button variant="primary" onClick={() => this.showBetsModal()}>Bets</Button>
             </Col>
             <Col>
               {newGame}
             </Col>
           </Row>
-          <CrapsTable currentGame={this.props.currentGame}/>
+          <BetsModal show={this.props.showBetsModal} hideCallback={() => this.hideBetsModal()} bets={this.props.betHelper}/>
+          <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
           <Row>
             <Col>
               {rollRows}

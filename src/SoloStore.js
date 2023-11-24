@@ -2,6 +2,8 @@ import { makeAutoObservable } from "mobx";
 
 import { RollUtils } from "./RollUtils";
 
+import BetHelper from "./BetHelper";
+
 const rollUtils = new RollUtils();
 
 class SoloStore {
@@ -13,6 +15,10 @@ class SoloStore {
   games = [];
 
   ready = true;
+
+  betHelper = new BetHelper();
+
+  betsModalShowing = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -32,6 +38,8 @@ class SoloStore {
       point: 0
     };
 
+    this.betHelper.reset();
+
     this.games.push(this.currentGame);
 
     this.gameStarted = true;
@@ -47,7 +55,7 @@ class SoloStore {
       throw new Error("Cannot perform a roll when a game isn't started");
     }
 
-    const bets = [];
+    const bets = this.betHelper.getBets();
     const rollResult = rollUtils.roll2d6();
     const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
 
@@ -64,6 +72,18 @@ class SoloStore {
     this.currentGame.rollCount++;
 
     this.ready = true;
+  }
+
+  showBetsModal() {
+    this.betsModalShowing = true;
+  }
+
+  hideBetsModal() {
+    this.betsModalShowing = false;
+  }
+
+  isShowBetsModal() {
+    return this.betsModalShowing;
   }
 
 }

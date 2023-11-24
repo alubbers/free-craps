@@ -126,8 +126,20 @@ class CrapsTable extends Component {
 
   buildPlaceBetComponents(mappedVariants) {
 
+    let bucketClickFunction = (code) => {};
+    if (this.props.bucketClick) {
+      bucketClickFunction = (code) => this.props.bucketClick(code);
+    }
+
     let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place').map((e) => {
-      return (<Button key={e.code} style={{fontSize: "x-large"}} variant={mappedVariants[e.code]} >{e.value}</Button>);
+      return (
+        <Button key={e.code}
+          onClick={() => bucketClickFunction(e.code)}
+          style={{fontSize: "x-large"}}
+          variant={mappedVariants[e.code]}>
+          {e.value}
+        </Button>
+      );
     });
 
     let setTwoBuckets = [];

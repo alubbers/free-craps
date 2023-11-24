@@ -5,7 +5,6 @@ import App from './App';
 import Profile from './Profile';
 import Solo from './Solo';
 import SoloStore from './SoloStore';
-import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
   RouterProvider,
