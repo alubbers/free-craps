@@ -30,6 +30,8 @@ export const MakeBetModal = props => {
 
   const [amount, setAmount] = useState(1);
 
+  const [initialized, setInitialized] = useState(1);
+
   let existingBet = 0n;
 
   let betLabel = "N/A";
@@ -54,14 +56,30 @@ export const MakeBetModal = props => {
     }
   }
 
-  let clearOnclick = (event) => {
+  if (!initialized) {
+    setAmount("" + existingBet);
+    setInitialized(true);
+  }
+
+  const clearOnclick = (event) => {
     props.saveCallback("0");
     props.hideCallback();
   }
 
-  let saveOnclick = (event) => {
-    props.saveCallback(amount);
+  const saveOnclick = (event) => {
+    const inputValue = document.getElementById("makeBetValue").value;
+    props.saveCallback(inputValue);
     props.hideCallback();
+  }
+
+  const updateMakeBetValue = () => {
+    const inputValue = document.getElementById("makeBetValue").value;
+    setAmount(inputValue);
+  }
+
+  const modalCloseCleanup = (followUpFunc) => {
+    setInitialized(false);
+    followUpFunc();
   }
 
   return (
@@ -73,14 +91,14 @@ export const MakeBetModal = props => {
         <Form>
           <Form.Group>
             <Form.Label>Amount</Form.Label>
-            <Form.Control type="text" placeholder="50" onChange={(event) => setAmount(event.target.value)}/>
+            <Form.Control id="makeBetValue" type="text" value={amount} onChange={() => updateMakeBetValue(setAmount)}/>
           </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-          <Button variant="secondary" onClick={props.hideCallback}>Cancel</Button>
-          <Button variant="danger" onClick={clearOnclick}>Clear</Button>
-          <Button variant="success" onClick={saveOnclick}>Bet!</Button>
+          <Button variant="secondary" onClick={(event) => modalCloseCleanup(props.hideCallback)}>Cancel</Button>
+          <Button variant="danger" onClick={(event) => modalCloseCleanup(clearOnclick)}>Clear</Button>
+          <Button variant="success" onClick={(event) => modalCloseCleanup(saveOnclick)}>Bet!</Button>
         </Modal.Footer>
     </Modal>
   );
