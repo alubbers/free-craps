@@ -23,7 +23,7 @@ class BetHelper {
   }
 
   getBetsForBucket(bucketCode) {
-    return this.bets.every( b => b.bucketCode === bucketCode );
+    return this.bets.filter( b => b.bucketCode === bucketCode );
   }
 
   // make a new bet or change an existing one

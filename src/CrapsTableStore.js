@@ -12,32 +12,32 @@ export class CrapsTableStore {
   constructor() {
     this.betBuckets.push({
       type: 'pass',
-      value: 'Pass Line',
+      label: 'Pass Line',
       code: 'pass'
     });
 
     this.betBuckets.push({
       type: 'pass',
-      value: "Don't Pass Bar",
+      label: "Don't Pass Bar",
       code: 'dontPass'
     });
 
     this.betBuckets.push({
       type: 'come',
-      value: 'Come',
+      label: 'Come',
       code: 'come'
     });
 
     this.betBuckets.push({
       type: 'come',
-      value: "Don't Come",
+      label: "Don't Come",
       code: 'dontCome'
     });
 
     PLACE_BETS.forEach((element) => {
       this.betBuckets.push({
         type: 'place',
-        value: '' + element,
+        label: '' + element,
         code: `place-${element}`
       });
     });
@@ -45,7 +45,7 @@ export class CrapsTableStore {
     HARD_WAYS.forEach((element) => {
       this.betBuckets.push({
         type: 'hardWay',
-        value: '' + element,
+        label: '' + element,
         code: `hardWay-${element}`
       });
     });
@@ -53,34 +53,38 @@ export class CrapsTableStore {
     HORN_BETS.forEach((element) => {
       this.betBuckets.push({
         type: 'horn',
-        value: '' + element,
+        label: '' + element,
         code: `horn-${element}`
       });
     });
 
     this.betBuckets.push({
       type: 'anySeven',
-      value: 'Any Seven',
+      label: 'Any Seven',
       code: 'anySeven'
     });
 
     this.betBuckets.push({
       type: 'anyCraps',
-      value: 'Any Craps',
+      label: 'Any Craps',
       code: 'anyCraps'
     });
 
     this.betBuckets.push({
       type: 'c-and-e',
-      value: 'C & E',
+      label: 'C & E',
       code: 'c-and-e'
     });
 
     this.betBuckets.push({
       type: 'field',
-      value: 'Field',
+      label: 'Field',
       code: 'field'
     });
+  }
+
+  getBucketForCode(code) {
+    return this.betBuckets.find(e => e.code === code);
   }
 
 }

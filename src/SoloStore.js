@@ -20,6 +20,8 @@ class SoloStore {
 
   betsModalShowing = false;
 
+  makeBetModalCode = undefined;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -82,8 +84,15 @@ class SoloStore {
     this.betsModalShowing = false;
   }
 
-  isShowBetsModal() {
-    return this.betsModalShowing;
+  showMakeBetModal(bucketCode) {
+    if (bucketCode === undefined) {
+      console.warn("Attempting to show the make bet modal with an undefined bucketCode is a no-op");
+    }
+    this.makeBetModalCode = bucketCode;
+  }
+
+  hideMakeBetModal() {
+    this.makeBetModalCode = undefined;
   }
 
 }

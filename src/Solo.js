@@ -7,7 +7,8 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTable from './CrapsTable';
-import BetsModal from './BetsModal';
+import { CrapsTableStore } from './CrapsTableStore';
+import { BetsModal, MakeBetModal } from './BetModals';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { observer } from "mobx-react"
 
@@ -15,7 +16,9 @@ import './App.css';
 
 const Solo = observer(({ store }) =>
   <SoloView soloStore={store}
-            showBetsModal={store.isShowBetsModal()}
+            showBetsModal={store.betsModalShowing}
+            showMakeBetModal={store.makeBetModalCode !== undefined}
+            makeBetModalCode={store.makeBetModalCode}
             gameStarted={store.gameStarted}
             storeReady={store.ready}
             currentGame={store.currentGame}
@@ -44,7 +47,15 @@ class SoloView extends Component {
   }
 
   betBucketClicked(code) {
-    alert("Hey! you hit bet bucket " + code);
+    this.store.showMakeBetModal(code);
+  }
+
+  hideMakeBetModal() {
+    this.store.hideMakeBetModal();
+  }
+
+  makeBet(amount) {
+    console.log(`Made a bet of ${amount} on ${this.props.makeBetModalCode}`);
   }
 
   buildActiveBody() {
@@ -108,7 +119,14 @@ class SoloView extends Component {
               {newGame}
             </Col>
           </Row>
-          <BetsModal show={this.props.showBetsModal} hideCallback={() => this.hideBetsModal()} bets={this.props.betHelper}/>
+          <BetsModal show={this.props.showBetsModal}
+            hideCallback={() => this.hideBetsModal()}
+            bets={this.props.betHelper}/>
+          <MakeBetModal show={this.props.showMakeBetModal}
+            hideCallback={() => this.hideMakeBetModal()}
+            saveCallback={(amount) => this.makeBet(amount)}
+            bets={this.props.betHelper}
+            bucketCode={this.props.makeBetModalCode}/>
           <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
           <Row>
             <Col>

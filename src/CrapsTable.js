@@ -33,7 +33,7 @@ class CrapsTable extends Component {
         let variant = "success";
 
         if (e.type === 'place') {
-          if (lastTotal + '' === e.value) {
+          if (lastTotal + '' === e.label) {
             if (lastRoll.crapsMeta.pointState === "POINT_SET") {
               variant = "outline-dark";
             }
@@ -44,7 +44,7 @@ class CrapsTable extends Component {
               variant = "outline-primary";
             }
           }
-          else if (this.props.currentGame.point + '' === e.value) {
+          else if (this.props.currentGame.point + '' === e.label) {
             variant = "dark";
           }
         }
@@ -75,7 +75,7 @@ class CrapsTable extends Component {
           }
         }
         else if (e.type === 'hardWay') {
-          if (lastTotal + '' === e.value) {
+          if (lastTotal + '' === e.label) {
             if (lastRoll.crapsMeta.hardWay) {
               variant = "outline-primary";
             }
@@ -85,7 +85,7 @@ class CrapsTable extends Component {
           }
         }
         else if (e.type === 'horn') {
-          if (lastTotal + '' === e.value) {
+          if (lastTotal + '' === e.label) {
             variant = "outline-primary";
           }
         }
@@ -137,7 +137,7 @@ class CrapsTable extends Component {
           onClick={() => bucketClickFunction(e.code)}
           style={{fontSize: "x-large"}}
           variant={mappedVariants[e.code]}>
-          {e.value}
+          {e.label}
         </Button>
       );
     });
