@@ -102,10 +102,6 @@ class SoloStore {
     }
     this.makeBetModalBucketCode = bucketCode;
     
-    console.log(`RATOUT 4: this.makeBetModalBucketCode = ${this.makeBetModalBucketCode}`);
-    
-    console.log(`RATOUT 4: this.betHelper.asJson() = [ ${this.betHelper.asJson()} ]`);
-    
     const betsForBucket = this.betHelper.getBetsForBucket(this.makeBetModalBucketCode);
     // TODO Assume the default type of bet within a bucket
     const betToCheck = betsForBucket.find((bet) => bet.type === "default");

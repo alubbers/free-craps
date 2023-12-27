@@ -21,14 +21,9 @@ const Solo = observer(({ store }) => {
 	  value: "0"
 	};
   
-  let fooDisplay = makeBetModal;
-	
 	if (store.makeBetModalValue !== undefined) {
 	  makeBetModal.value = store.makeBetModalValue;
-    fooDisplay.value = store.makeBetModalValue.toString();
 	}
-	
-	console.log(`RATOUT 1: About to render SoloView, betsModal= [ ${JSON.stringify(betsModal)} ] , makeBetModal = [ ${JSON.stringify(fooDisplay)} ]`);
 	
 	return (
 	  <SoloView soloStore={store}
@@ -72,12 +67,10 @@ class SoloView extends Component {
   }
   
   updateMakeBetValue(newValue) {
-	console.log(`RATOUT 2: updating make bet value from ${this.props.makeBetModal.value} to ${newValue}`);
-	this.store.updateMakeBetValue(newValue);
+  	this.store.updateMakeBetValue(newValue);
   }
 
   makeBet() {
-    console.log(`Made a bet of ${this.props.makeBetModal.value} on ${this.props.makeBetModal.code}`);
     this.store.betMade();
   }
 
