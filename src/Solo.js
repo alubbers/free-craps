@@ -84,7 +84,7 @@ class SoloView extends Component {
   buildActiveBody() {
     const newGame = <Button variant="primary" onClick={() => this.startNewGame()}>New</Button>;
 
-    let currentActivity;
+    let currentActivity = <div>{newGame}</div>;
 
     if (this.props.gameStarted) {
       let rollElementList = [].concat(this.props.currentGame.rolls);
@@ -183,9 +183,6 @@ class SoloView extends Component {
           </Row>
         </>
       );
-    }
-    else {
-      currentActivity = <div>{newGame}</div>;
     }
 
     return currentActivity;

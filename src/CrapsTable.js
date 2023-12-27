@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 
 import IdlingComponent from './IdlingComponent';
-import {ANY_CRAPS, C_AND_E, FIELD_VALUES, CrapsTableStore} from './CrapsTableStore';
+import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD_VALUES, CrapsTableStore} from './CrapsTableStore';
 import {POINT_STATES, RollUtils} from './RollUtils';
 
 import logo from './logo.svg';
@@ -123,13 +123,19 @@ class CrapsTable extends Component {
 
     return mappedVariants;
   }
+  
+  getBucketClickFunction() {
+    let result = (code) => {};
+    if (this.props.bucketClick) {
+      result = (code) => this.props.bucketClick(code);
+    }
+    
+    return result;
+  }
 
   buildPlaceBetComponents(mappedVariants) {
 
-    let bucketClickFunction = (code) => {};
-    if (this.props.bucketClick) {
-      bucketClickFunction = (code) => this.props.bucketClick(code);
-    }
+    const bucketClickFunction = this.getBucketClickFunction();
 
     let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place').map((e) => {
       return (
@@ -155,12 +161,40 @@ class CrapsTable extends Component {
       setTwo: (<ButtonGroup style={{width: "100%"}}>{setTwoBuckets}</ButtonGroup>)
     }
   }
+  
+  buildHardWayComponentMap(mappedVariants) {
+    
+    const bucketClickFunction = this.getBucketClickFunction();
+    let componentMap = {};
+    
+    HARD_WAYS.forEach((hardWayNum) => {
+      const code = `hardWay-${hardWayNum}`;
+      const bucket = this.store.getBucketForCode(code);
+      
+      
+      let result = <></>;
+      
+      if (bucket) {
+        result = ( <Button key={code} onClick={() => bucketClickFunction(code)} variant={mappedVariants[code]}>
+              {bucket.label}
+            </Button>
+            );
+      }
+      
+      componentMap[code] = result;
+    });
+    
+    
+    return componentMap;
+  }
 
   buildActiveBody() {
 
     let mappedVariants = this.buildMappedVariants();
 
     const placeBetButtonGroups = this.buildPlaceBetComponents(mappedVariants);
+    
+    const hardWayComponents = this.buildHardWayComponentMap(mappedVariants);
 
     let fieldTextColor = "yellow";
     if (mappedVariants["field"] === "outline-primary") {
@@ -186,12 +220,12 @@ class CrapsTable extends Component {
               <Col xs="12">
                 <div style={{width: "1%", float: "left"}}>H A R D</div>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  <Button variant={mappedVariants["hardWay-4"]}>4</Button>
-                  <Button variant={mappedVariants["hardWay-8"]}>8</Button>
+                  {hardWayComponents["hardWay-4"]}
+                  {hardWayComponents["hardWay-8"]}
                 </ButtonGroup>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  <Button variant={mappedVariants["hardWay-6"]}>6</Button>
-                  <Button variant={mappedVariants["hardWay-10"]}>10</Button>
+                  {hardWayComponents["hardWay-6"]}
+                  {hardWayComponents["hardWay-10"]}
                 </ButtonGroup>
               </Col>
             </Row>

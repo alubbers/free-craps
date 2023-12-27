@@ -90,6 +90,10 @@ export class CrapsTableStore {
   buildCompleteLabelTextForCode(code) {
     const bucket = this.getBucketForCode(code);
     
+    return this.buildCompleteLabelTextForBucket(bucket);
+  }
+  
+  buildCompleteLabelTextForBucket(bucket) {
     let result = "";
     if (bucket) {
       switch(bucket.type) {
