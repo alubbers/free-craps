@@ -80,7 +80,7 @@ class SoloStore {
 
   betMade() {
     this.ready = false;
-
+    
     this.betHelper.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
 
     this.ready = true;
@@ -95,7 +95,7 @@ class SoloStore {
   }
 
   showMakeBetModal(bucketCode) {
-	this.ready = false;
+	  this.ready = false;
 	
     if (bucketCode === undefined) {
       console.warn("Attempting to show the make bet modal with an undefined bucketCode is a no-op");
@@ -107,23 +107,23 @@ class SoloStore {
     const betToCheck = betsForBucket.find((bet) => bet.type === "default");
     
     if (betToCheck) {
-      this.makeBetModalValue = betToCheck.amount;
+      this.makeBetModalValue = betToCheck.amount.toString();
     }
     
     this.ready = true;
   }
 
   hideMakeBetModal() {
-	this.ready = false;
+    this.ready = false;
 	
-	this.makeBetModalBucketCode = undefined;
+    this.makeBetModalBucketCode = undefined;
     this.makeBetModalValue = undefined;
     
     this.ready = true;
   }
   
   updateMakeBetValue(newValue) {
-	this.makeBetModalValue = newValue;
+    this.makeBetModalValue = newValue;
   }
 
 }

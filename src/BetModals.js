@@ -9,9 +9,18 @@ const crapsTableStore = new CrapsTableStore();
 export const BetsModal = props => {
 
   let betSummary = <span>You have no bets</span>;
+  
+  let filteredZeros = undefined;
+  if (props.bets) {
+    filteredZeros = props.bets.filter( (bet) => bet.amount !== 0n );
+  }
 
-  if (props.betHelper && props.betHelper.bets.length > 0) {
-    <span>You have some bets!</span>;
+  if (filteredZeros && filteredZeros.length > 0) {
+    
+    
+    let betList = filteredZeros.map( (bet) => <li key={bet.bucketCode}>${bet.amount.toString()} on {crapsTableStore.buildCompleteLabelTextForCode(bet.bucketCode)}</li> );
+    
+    betSummary = <div><ul>{betList}</ul></div>;
   }
 
   return (
@@ -28,18 +37,7 @@ export const BetsModal = props => {
 
 export const MakeBetModal = props => {
 
-  let betLabel = "";
-  
-  const bucket = crapsTableStore.getBucketForCode(props.modalState.code);
-
-  if (bucket) {
-    betLabel = bucket.label;
-
-    if (bucket.type === "hard") {
-      betLabel = "Hard " + betLabel;
-    }
-
-  }
+  const betLabel = crapsTableStore.buildCompleteLabelTextForCode(props.modalState.code);
 
   const clearOnclick = (event) => {
     props.updateCallback("0");

@@ -86,5 +86,31 @@ export class CrapsTableStore {
   getBucketForCode(code) {
     return this.betBuckets.find(e => e.code === code);
   }
+  
+  buildCompleteLabelTextForCode(code) {
+    const bucket = this.getBucketForCode(code);
+    
+    let result = "";
+    if (bucket) {
+      switch(bucket.type) {
+        case "place": {
+          result = "Place ";
+          break;
+        }
+        case "horn": {
+          result = "Horn ";
+          break;
+        }
+        case "hardWay": {
+          result = "Hard ";
+          break;
+        }
+      }
+      
+      result = result + bucket.label;
+    }
+    
+    return result;
+  }
 
 }

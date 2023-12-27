@@ -13,6 +13,7 @@ import './App.css';
 const Solo = observer(({ store }) => { 
 	const betsModal = {
 	  show: store.betsModalShowing,
+    bets: store.betHelper.getBets()
 	};
 	
 	let makeBetModal = {
@@ -71,6 +72,12 @@ class SoloView extends Component {
   }
 
   makeBet() {
+    // sanity check the value
+    if (!this.store.makeBetModalValue) {
+      // if no value was defined, assume it was meant to be 0
+      this.updateMakeBetValue(0n);
+    }
+    
     this.store.betMade();
   }
 
@@ -149,7 +156,7 @@ class SoloView extends Component {
           </Row>
           <BetsModal show={this.props.betsModal.show}
             hideCallback={() => this.hideBetsModal()}
-            bets={this.props.betHelper}/>
+            bets={this.props.betsModal.bets}/>
           <MakeBetModal show={this.props.makeBetModal.show}
             hideCallback={() => this.hideMakeBetModal()}
             saveCallback={() => this.makeBet()}
