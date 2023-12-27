@@ -1,28 +1,45 @@
 import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTable from './CrapsTable';
-import { CrapsTableStore } from './CrapsTableStore';
 import { BetsModal, MakeBetModal } from './BetModals';
-import ListGroup from 'react-bootstrap/ListGroup';
 import { observer } from "mobx-react"
 
 import './App.css';
 
-const Solo = observer(({ store }) =>
-  <SoloView soloStore={store}
-            showBetsModal={store.betsModalShowing}
-            showMakeBetModal={store.makeBetModalCode !== undefined}
-            makeBetModalCode={store.makeBetModalCode}
+const Solo = observer(({ store }) => { 
+	const betsModal = {
+	  show: store.betsModalShowing,
+	};
+	
+	let makeBetModal = {
+	  show: store.makeBetModalBucketCode !== undefined,
+	  code: store.makeBetModalBucketCode,
+	  value: "0"
+	};
+  
+  let fooDisplay = makeBetModal;
+	
+	if (store.makeBetModalValue !== undefined) {
+	  makeBetModal.value = store.makeBetModalValue;
+    fooDisplay.value = store.makeBetModalValue.toString();
+	}
+	
+	console.log(`RATOUT 1: About to render SoloView, betsModal= [ ${JSON.stringify(betsModal)} ] , makeBetModal = [ ${JSON.stringify(fooDisplay)} ]`);
+	
+	return (
+	  <SoloView soloStore={store}
+            betsModal={betsModal}
+            makeBetModal={makeBetModal}
             gameStarted={store.gameStarted}
             storeReady={store.ready}
             currentGame={store.currentGame}
-            betHelper={store.betHelper} />);
+            betHelper={store.betHelper} />
+	);
+  });
 
 class SoloView extends Component {
 
@@ -53,9 +70,15 @@ class SoloView extends Component {
   hideMakeBetModal() {
     this.store.hideMakeBetModal();
   }
+  
+  updateMakeBetValue(newValue) {
+	console.log(`RATOUT 2: updating make bet value from ${this.props.makeBetModal.value} to ${newValue}`);
+	this.store.updateMakeBetValue(newValue);
+  }
 
-  makeBet(amount) {
-    console.log(`Made a bet of ${amount} on ${this.props.makeBetModalCode}`);
+  makeBet() {
+    console.log(`Made a bet of ${this.props.makeBetModal.value} on ${this.props.makeBetModal.code}`);
+    this.store.betMade();
   }
 
   buildActiveBody() {
@@ -106,6 +129,18 @@ class SoloView extends Component {
       const startedDate = this.props.currentGame.when;
       const startedDisplay = `${startedDate.getMonth() + 1}/${startedDate.getDate()}/${startedDate.getFullYear()}`;
 
+      let existingBets = undefined;
+      if (this.props.makeBetModal.show) {
+        const betsForBucket = this.props.betHelper.getBetsForBucket(this.props.makeBetModal.code);
+
+        if (betsForBucket) {
+          existingBets = {};
+          betsForBucket.forEach(b => {
+            existingBets[b.type] = b;
+          });
+        }
+      }
+
       currentActivity = (
         <>
           <Row>
@@ -119,15 +154,28 @@ class SoloView extends Component {
               {newGame}
             </Col>
           </Row>
-          <BetsModal show={this.props.showBetsModal}
+          <BetsModal show={this.props.betsModal.show}
             hideCallback={() => this.hideBetsModal()}
             bets={this.props.betHelper}/>
-          <MakeBetModal show={this.props.showMakeBetModal}
+          <MakeBetModal show={this.props.makeBetModal.show}
             hideCallback={() => this.hideMakeBetModal()}
-            saveCallback={(amount) => this.makeBet(amount)}
-            bets={this.props.betHelper}
-            bucketCode={this.props.makeBetModalCode}/>
+            saveCallback={() => this.makeBet()}
+            updateCallback={(amount) => this.updateMakeBetValue(amount)}
+            modalState={this.props.makeBetModal}/>
           <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
+          <div>
+          {JSON.stringify({
+            startingBank: this.props.betHelper.startingBank.toString(),
+            bank: this.props.betHelper.bank.toString(),
+            bets: this.props.betHelper.bets.map( b => {
+              return {
+                amount: b.amount.toString(),
+                bucketCode: b.bucketCode,
+                type: b.type
+              };
+              })
+          })}
+          </div>
           <Row>
             <Col>
               {rollRows}

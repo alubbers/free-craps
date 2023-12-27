@@ -20,7 +20,9 @@ class SoloStore {
 
   betsModalShowing = false;
 
-  makeBetModalCode = undefined;
+  makeBetModalBucketCode = undefined;
+  
+  makeBetModalValue = undefined;
 
   constructor() {
     makeAutoObservable(this);
@@ -76,6 +78,14 @@ class SoloStore {
     this.ready = true;
   }
 
+  betMade() {
+    this.ready = false;
+
+    this.betHelper.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
+
+    this.ready = true;
+  }
+
   showBetsModal() {
     this.betsModalShowing = true;
   }
@@ -85,14 +95,39 @@ class SoloStore {
   }
 
   showMakeBetModal(bucketCode) {
+	this.ready = false;
+	
     if (bucketCode === undefined) {
       console.warn("Attempting to show the make bet modal with an undefined bucketCode is a no-op");
     }
-    this.makeBetModalCode = bucketCode;
+    this.makeBetModalBucketCode = bucketCode;
+    
+    console.log(`RATOUT 4: this.makeBetModalBucketCode = ${this.makeBetModalBucketCode}`);
+    
+    console.log(`RATOUT 4: this.betHelper.asJson() = [ ${this.betHelper.asJson()} ]`);
+    
+    const betsForBucket = this.betHelper.getBetsForBucket(this.makeBetModalBucketCode);
+    // TODO Assume the default type of bet within a bucket
+    const betToCheck = betsForBucket.find((bet) => bet.type === "default");
+    
+    if (betToCheck) {
+      this.makeBetModalValue = betToCheck.amount;
+    }
+    
+    this.ready = true;
   }
 
   hideMakeBetModal() {
-    this.makeBetModalCode = undefined;
+	this.ready = false;
+	
+	this.makeBetModalBucketCode = undefined;
+    this.makeBetModalValue = undefined;
+    
+    this.ready = true;
+  }
+  
+  updateMakeBetValue(newValue) {
+	this.makeBetModalValue = newValue;
   }
 
 }

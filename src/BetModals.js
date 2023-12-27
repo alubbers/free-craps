@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
@@ -28,15 +28,9 @@ export const BetsModal = props => {
 
 export const MakeBetModal = props => {
 
-  const [amount, setAmount] = useState(1);
-
-  const [initialized, setInitialized] = useState(1);
-
-  let existingBet = 0n;
-
-  let betLabel = "N/A";
-
-  const bucket = crapsTableStore.getBucketForCode(props.bucketCode);
+  let betLabel = "";
+  
+  const bucket = crapsTableStore.getBucketForCode(props.modalState.code);
 
   if (bucket) {
     betLabel = bucket.label;
@@ -45,41 +39,21 @@ export const MakeBetModal = props => {
       betLabel = "Hard " + betLabel;
     }
 
-    const betsForBucket = props.bets.getBetsForBucket(props.bucketCode);
-
-    // TODO find the default bucket for now
-    if (betsForBucket) {
-      const defaultBet = betsForBucket.find(b => b.type === "default");
-      if (defaultBet) {
-        existingBet = defaultBet.amount;
-      }
-    }
-  }
-
-  if (!initialized) {
-    setAmount("" + existingBet);
-    setInitialized(true);
   }
 
   const clearOnclick = (event) => {
-    props.saveCallback("0");
+    props.updateCallback("0");
+    props.saveCallback();
     props.hideCallback();
   }
 
   const saveOnclick = (event) => {
-    const inputValue = document.getElementById("makeBetValue").value;
-    props.saveCallback(inputValue);
+    props.saveCallback();
     props.hideCallback();
   }
 
-  const updateMakeBetValue = () => {
-    const inputValue = document.getElementById("makeBetValue").value;
-    setAmount(inputValue);
-  }
-
-  const modalCloseCleanup = (followUpFunc) => {
-    setInitialized(false);
-    followUpFunc();
+  const updateMakeBetValue = (event) => {
+    props.updateCallback(event?.target?.value);
   }
 
   return (
@@ -91,14 +65,14 @@ export const MakeBetModal = props => {
         <Form>
           <Form.Group>
             <Form.Label>Amount</Form.Label>
-            <Form.Control id="makeBetValue" type="text" value={amount} onChange={() => updateMakeBetValue(setAmount)}/>
+            <Form.Control id="makeBetValue" type="text" value={props.modalState.value} onChange={(event) => updateMakeBetValue(event)}/>
           </Form.Group>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-          <Button variant="secondary" onClick={(event) => modalCloseCleanup(props.hideCallback)}>Cancel</Button>
-          <Button variant="danger" onClick={(event) => modalCloseCleanup(clearOnclick)}>Clear</Button>
-          <Button variant="success" onClick={(event) => modalCloseCleanup(saveOnclick)}>Bet!</Button>
+          <Button variant="secondary" onClick={(event) => props.hideCallback()}>Cancel</Button>
+          <Button variant="danger" onClick={(event) => clearOnclick()}>Clear</Button>
+          <Button variant="success" onClick={(event) => saveOnclick()}>Bet!</Button>
         </Modal.Footer>
     </Modal>
   );
