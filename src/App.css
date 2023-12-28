@@ -1,3 +1,17 @@
+#bucketButton-dontPass {
+  width: 100%;
+  color: black;
+}
+
+#bucketButton-field {
+  width: 100%;
+  color: #cccc00;
+}
+
+#bucketButton-c-and-e, #bucketButton-anySeven, #bucketButton-pass {
+  width: 100%;
+}
+
 .placeBetCell {
   padding: 1em;
 }

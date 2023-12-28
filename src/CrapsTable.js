@@ -162,28 +162,30 @@ class CrapsTable extends Component {
     }
   }
   
-  buildHardWayComponentMap(mappedVariants) {
+  buildBucketButton(mappedVariants, bucket) {
+    let result = <></>;
+      
+    if (bucket) {
+      const bucketClickFunction = this.getBucketClickFunction();
+      
+      result = ( <Button id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket.code)} variant={mappedVariants[bucket.code]}>
+            {bucket.label}
+          </Button>
+          );
+    }
     
-    const bucketClickFunction = this.getBucketClickFunction();
+    return result;
+  }
+  
+  buildHardWayComponentMap(mappedVariants) {
     let componentMap = {};
     
     HARD_WAYS.forEach((hardWayNum) => {
       const code = `hardWay-${hardWayNum}`;
       const bucket = this.store.getBucketForCode(code);
       
-      
-      let result = <></>;
-      
-      if (bucket) {
-        result = ( <Button key={code} onClick={() => bucketClickFunction(code)} variant={mappedVariants[code]}>
-              {bucket.label}
-            </Button>
-            );
-      }
-      
-      componentMap[code] = result;
+      componentMap[code] = this.buildBucketButton(mappedVariants, bucket);
     });
-    
     
     return componentMap;
   }
@@ -232,8 +234,8 @@ class CrapsTable extends Component {
             <Row>
               <Col xs="12">
                 <ButtonGroup>
-                  <Button variant={mappedVariants["c-and-e"]} style={{width: "100%"}}>C&amp;E</Button>
-                  <Button variant={mappedVariants["anySeven"]} style={{width: "100%"}}>7</Button>
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("c-and-e"))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("anySeven"))}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -243,14 +245,14 @@ class CrapsTable extends Component {
           <Col xs="7">
             <Row>
               <Col>
-                <Button style={{width: "100%", color: "#cccc00"}} variant={mappedVariants["field"]}>Field</Button>
+                {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("field"))}
               </Col>
             </Row>
             <Row>
               <Col xs="12">
                 <ButtonGroup style={{width: "100%"}}>
-                  <Button style={{width: "100%"}} variant={mappedVariants["pass"]}>Pass</Button>
-                  <Button style={{width: "100%", color: "black"}} variant={mappedVariants["dontPass"]}>No Pass</Button>
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("pass"))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("dontPass"))}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -258,12 +260,12 @@ class CrapsTable extends Component {
           <Col xs="5">
             <div style={{width: "1%", float: "left"}}>H O R N</div>
             <ButtonGroup vertical style={{ height: "100%"}}>
-              <Button variant={mappedVariants["horn-2"]}>2</Button>
-              <Button variant={mappedVariants["horn-11"]}>11</Button>
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-2"))}
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-11"))}
             </ButtonGroup>
             <ButtonGroup vertical style={{ height: "100%"}}>
-              <Button variant={mappedVariants["horn-3"]}>3</Button>
-              <Button variant={mappedVariants["horn-12"]}>12</Button>
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-3"))}
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-12"))}
             </ButtonGroup>
           </Col>
         </Row>
