@@ -16,11 +16,21 @@ export const BetsModal = props => {
   }
 
   if (filteredZeros && filteredZeros.length > 0) {
-    
-    
-    let betList = filteredZeros.map( (bet) => <li key={bet.bucketCode}>${bet.amount.toString()} on {crapsTableStore.buildCompleteLabelTextForCode(bet.bucketCode)}</li> );
-    
-    betSummary = <div><ul>{betList}</ul></div>;
+    let betTotal = 0n;
+    let betList = filteredZeros.map( (bet) => {
+      betTotal = betTotal + bet.amount;
+      return ( 
+        <li key={bet.bucketCode}>
+          ${bet.amount.toString()} on {crapsTableStore.buildCompleteLabelTextForCode(bet.bucketCode)}
+        </li>
+        );
+    });
+    betSummary = (
+      <div>
+        <ul>{betList}</ul>
+        <span>{`Total: $${betTotal}`}</span>
+      </div>
+    );
   }
 
   return (
@@ -63,7 +73,7 @@ export const MakeBetModal = props => {
         <Form>
           <Form.Group>
             <Form.Label>Amount</Form.Label>
-            <Form.Control id="makeBetValue" type="text" value={props.modalState.value} onChange={(event) => updateMakeBetValue(event)}/>
+            <Form.Control id="makeBetValue" type="number" min="0" value={props.modalState.value} onChange={(event) => updateMakeBetValue(event)}/>
           </Form.Group>
         </Form>
       </Modal.Body>

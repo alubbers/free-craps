@@ -164,17 +164,7 @@ class SoloView extends Component {
             modalState={this.props.makeBetModal}/>
           <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
           <div>
-          {JSON.stringify({
-            startingBank: this.props.betHelper.startingBank.toString(),
-            bank: this.props.betHelper.bank.toString(),
-            bets: this.props.betHelper.bets.map( b => {
-              return {
-                amount: b.amount.toString(),
-                bucketCode: b.bucketCode,
-                type: b.type
-              };
-              })
-          })}
+            <span>Cash: ${this.props.betHelper.bank.toString()}</span>
           </div>
           <Row>
             <Col>
