@@ -81,6 +81,81 @@ class BetHelper {
        return { ...b, amount: b.amount.toString() }
       });
   }
+  
+  /**
+   * Build a map with details on the betting results of the given roll.
+   * 
+   * @param rollFrame a map of 3 properties:
+   *   roll:  The roll result from RollUtils
+   *   crapsMeta:  The metadata about the roll result
+   *   activeBets: the bets in place for the roll
+   */
+  buildBetResults(rollFrame) {
+    let result = {
+      totalBankChange: 0,
+      winners: [],
+      losers: [],
+      updatedBets: rollFrame.activeBets.map( e => { return { ...e, id: `${e.bucketCode}-${e.type}`}; } )
+    };
+    
+    // map the bets by bucket code and type
+    let mappedBets = {};
+    result.updatedBets.forEach( bet => mappedBets[`${bet.bucketCode}-${bet.type}`] = bet);
+    
+    // let of bet ids that clear away after losing
+    let removedBetIds = [];
+    
+    if (rollFrame.crapsMeta.craps) {
+      const passLineBet = mappedBets["pass-default"];
+      if (passLineBet) {
+        removedBetIds.push(passLineBet.id);
+        result.losers.push(passLineBet);
+      }
+      
+      const dontPassBet = mappedBets["dontPass-default"];
+      if (dontPassBet) {
+        // Traditionally, a don't pass bet on a 12 is a 'push' , i.e. a tie, so it doesn't win or lose
+        if (rollFrame.roll.total !== 12) {
+          result.winners.push(dontPassBet);
+        }
+      }
+    }
+    else {
+      if (rollFrame.crapsMeta.passLineWin) {
+        const passLineBet = mappedBets["pass-default"];
+        if (passLineBet) {
+          result.winners.push(passLineBet);
+        }
+        
+        const dontPassBet = mappedBets["dontPass-default"];
+        if (dontPassBet) {
+          removedBetIds.push(dontPassBet.id);
+          result.losers.push(dontPassBet);
+        }
+      }
+      else {
+        if (rollFrame.crapsMeta.pointState === "POINT_HIT") {
+          const passLineBet = mappedBets["pass-default"];
+          if (passLineBet) {
+            result.winners.push(passLineBet);
+          }
+        }
+
+        if (rollFrame.crapsMeta.pointState === "LINE_AWAY") {
+          // gather up losers
+        }
+      }
+
+      if (rollFrame.crapsMeta.hardWay) {
+        // FIXME
+      }
+    }
+    
+    // analyze number result for specific bets
+    
+    
+    return result;
+  }
 
 }
 

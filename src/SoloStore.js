@@ -62,12 +62,18 @@ class SoloStore {
     const bets = this.betHelper.getBets();
     const rollResult = rollUtils.roll2d6();
     const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
-
-    this.currentGame.rolls.push({
+    
+    const rollFrame = {
       roll: rollResult,
       crapsMeta: crapsResult,
       activeBets: bets
-    });
+    };
+
+    this.currentGame.rolls.push(rollFrame);
+    
+    const betResults = this.betHelper.handleBetsForRoll(rollFrame);
+    
+    console.log(`There were ${betResults.winners.length} winning bets`);
 
     if (crapsResult.newPoint !== -1) {
       this.currentGame.point = crapsResult.newPoint;
