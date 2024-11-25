@@ -21,7 +21,7 @@ class SoloStore {
   betsModalShowing = false;
 
   makeBetModalBucketCode = undefined;
-  
+
   makeBetModalValue = undefined;
 
   constructor() {
@@ -62,7 +62,7 @@ class SoloStore {
     const bets = this.betHelper.getBets();
     const rollResult = rollUtils.roll2d6();
     const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
-    
+
     const rollFrame = {
       roll: rollResult,
       crapsMeta: crapsResult,
@@ -70,9 +70,9 @@ class SoloStore {
     };
 
     this.currentGame.rolls.push(rollFrame);
-    
-    const betResults = this.betHelper.handleBetsForRoll(rollFrame);
-    
+
+    const betResults = this.betHelper.buildBetResults(rollFrame);
+
     console.log(`There were ${betResults.winners.length} winning bets`);
 
     if (crapsResult.newPoint !== -1) {
@@ -86,7 +86,7 @@ class SoloStore {
 
   betMade() {
     this.ready = false;
-    
+
     this.betHelper.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
 
     this.ready = true;
@@ -102,32 +102,32 @@ class SoloStore {
 
   showMakeBetModal(bucketCode) {
 	  this.ready = false;
-	
+
     if (bucketCode === undefined) {
       console.warn("Attempting to show the make bet modal with an undefined bucketCode is a no-op");
     }
     this.makeBetModalBucketCode = bucketCode;
-    
+
     const betsForBucket = this.betHelper.getBetsForBucket(this.makeBetModalBucketCode);
     // TODO Assume the default type of bet within a bucket
     const betToCheck = betsForBucket.find((bet) => bet.type === "default");
-    
+
     if (betToCheck) {
       this.makeBetModalValue = betToCheck.amount.toString();
     }
-    
+
     this.ready = true;
   }
 
   hideMakeBetModal() {
     this.ready = false;
-	
+
     this.makeBetModalBucketCode = undefined;
     this.makeBetModalValue = undefined;
-    
+
     this.ready = true;
   }
-  
+
   updateMakeBetValue(newValue) {
     this.makeBetModalValue = newValue;
   }
