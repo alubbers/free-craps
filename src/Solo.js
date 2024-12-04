@@ -10,32 +10,32 @@ import { observer } from "mobx-react"
 
 import './App.css';
 
-const Solo = observer(({ store }) => { 
+const Solo = observer(({ store }) => {
 	const betsModal = {
 	  show: store.betsModalShowing,
-    bets: store.betHelper.getBets()
+		bets: store.betTracker.getBets()
 	};
-	
+
 	let makeBetModal = {
 	  show: store.makeBetModalBucketCode !== undefined,
 	  code: store.makeBetModalBucketCode,
 	  value: "0"
 	};
-  
+
 	if (store.makeBetModalValue !== undefined) {
 	  makeBetModal.value = store.makeBetModalValue;
 	}
-	
+
 	return (
-	  <SoloView soloStore={store}
-            betsModal={betsModal}
-            makeBetModal={makeBetModal}
-            gameStarted={store.gameStarted}
-            storeReady={store.ready}
-            currentGame={store.currentGame}
-            betHelper={store.betHelper} />
+		<SoloView soloStore={store}
+          betsModal={betsModal}
+          makeBetModal={makeBetModal}
+          gameStarted={store.gameStarted}
+          storeReady={store.ready}
+          currentGame={store.currentGame}
+					betTracker={store.betTracker} />
 	);
-  });
+});
 
 class SoloView extends Component {
 
@@ -66,7 +66,7 @@ class SoloView extends Component {
   hideMakeBetModal() {
     this.store.hideMakeBetModal();
   }
-  
+
   updateMakeBetValue(newValue) {
   	this.store.updateMakeBetValue(newValue);
   }
@@ -77,7 +77,7 @@ class SoloView extends Component {
       // if no value was defined, assume it was meant to be 0
       this.updateMakeBetValue(0n);
     }
-    
+
     this.store.betMade();
   }
 
@@ -131,7 +131,7 @@ class SoloView extends Component {
 
       let existingBets = undefined;
       if (this.props.makeBetModal.show) {
-        const betsForBucket = this.props.betHelper.getBetsForBucket(this.props.makeBetModal.code);
+				const betsForBucket = this.props.betTracker.getBetsForBucket(this.props.makeBetModal.code);
 
         if (betsForBucket) {
           existingBets = {};
@@ -164,7 +164,7 @@ class SoloView extends Component {
             modalState={this.props.makeBetModal}/>
           <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
           <div>
-            <span>Cash: ${this.props.betHelper.bank.toString()}</span>
+						<span>Cash: ${this.props.betTracker.bank.toString()}</span>
           </div>
           <Row>
             <Col>
@@ -183,7 +183,7 @@ class SoloView extends Component {
     return <div className="App">
       <div>Single Player</div>
       <div>
-        <IdlingComponent active={this.props.storeReady} activeComponentBuilder={() => this.buildActiveBody()} />
+				<IdlingComponent active={this.props.storeReady} activeComponentBuilder={() => this.buildActiveBody()} />
       </div>
     </div>;
   }

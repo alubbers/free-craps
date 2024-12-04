@@ -2,9 +2,12 @@ import { makeAutoObservable } from "mobx";
 
 import { RollUtils } from "./RollUtils";
 
+import BetTracker from "./BetTracker";
 import BetHelper from "./BetHelper";
 
 const rollUtils = new RollUtils();
+
+const betHelper = new BetHelper();
 
 class SoloStore {
 
@@ -16,7 +19,7 @@ class SoloStore {
 
   ready = true;
 
-  betHelper = new BetHelper();
+  betTracker = new BetTracker();
 
   betsModalShowing = false;
 
@@ -42,7 +45,7 @@ class SoloStore {
       point: 0
     };
 
-    this.betHelper.reset();
+    this.betTracker.reset();
 
     this.games.push(this.currentGame);
 
@@ -59,7 +62,7 @@ class SoloStore {
       throw new Error("Cannot perform a roll when a game isn't started");
     }
 
-    const bets = this.betHelper.getBets();
+    const bets = this.betTracker.getBets();
     const rollResult = rollUtils.roll2d6();
     const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
 
@@ -71,7 +74,7 @@ class SoloStore {
 
     this.currentGame.rolls.push(rollFrame);
 
-    const betResults = this.betHelper.buildBetResults(rollFrame);
+    const betResults = betHelper.buildBetResults(rollFrame);
 
     console.log(`There were ${betResults.winners.length} winning bets`);
 
@@ -87,7 +90,7 @@ class SoloStore {
   betMade() {
     this.ready = false;
 
-    this.betHelper.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
+    this.betTracker.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
 
     this.ready = true;
   }
@@ -108,7 +111,7 @@ class SoloStore {
     }
     this.makeBetModalBucketCode = bucketCode;
 
-    const betsForBucket = this.betHelper.getBetsForBucket(this.makeBetModalBucketCode);
+    const betsForBucket = this.betTracker.getBetsForBucket(this.makeBetModalBucketCode);
     // TODO Assume the default type of bet within a bucket
     const betToCheck = betsForBucket.find((bet) => bet.type === "default");
 
