@@ -120,19 +120,31 @@ class BetHelper {
     // analyze number result for specific bets
 
     // Hard ways
-    /*
     if (HARD_WAYS.includes(rollFrame.roll.total)) {
-      if (crapsMeta.hardWay) {
-        this._pushIfNotEmpty(result.winners, mappedBets[`hardWay-${roll.total}`]);
-      }
-      else {
-        markBetLoser(`hardWay-${roll.total}`);
+      let hardId = `hardWay-${rollFrame.roll.total}-default`;
+
+      // if the bet isn't already determined to be a loser
+      if (!removedBetIds.includes(hardId)) {
+        if (crapsMeta.hardWay) {
+          this._pushIfNotEmpty(result.winners, mappedBets[`hardWay-${rollFrame.roll.total}-default`]);
+        }
+        else {
+          markBetLoser(`hardWay-${rollFrame.roll.total}-default`);
+        }
       }
     }
-    */
 
-    // check field bets
-
+    // check field bet, either wins or loses each roll
+    const fieldBetId = 'field-default';
+    // don't bother checking if it's already lost
+    if (!removedBetIds.includes(fieldBetId)) {
+      if (FIELD_VALUES.includes(rollFrame.roll.total)) {
+        this._pushIfNotEmpty(result.winners, mappedBets[fieldBetId]);
+      }
+      else {
+        markBetLoser(fieldBetId);
+      }
+    }
 
     // create updatedBets
 

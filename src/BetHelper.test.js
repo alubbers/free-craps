@@ -136,3 +136,74 @@ test("buildBetResults.lose-dont-pass-bar-point-set", () => {
   });
 });
 
+
+test("buildBetResults.win-hard-ways", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "hardWay-4", type: "default"} ], 6),
+    buildTestResults({a:3, b:3, total:6}, [ { amount: 5n, bucketCode: "hardWay-6", type: "default"} ]),
+    buildTestResults({a:4, b:4, total:8}, [ { amount: 5n, bucketCode: "hardWay-8", type: "default"} ], 8),
+    buildTestResults({a:5, b:5, total:10}, [ { amount: 5n, bucketCode: "hardWay-10", type: "default"} ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual(expect.stringContaining("hardWay-"));
+  });
+});
+
+test("buildBetResults.push-hard-ways", () => {
+  [
+    buildTestResults({a:3, b:3, total:6}, [ { amount: 5n, bucketCode: "hardWay-4", type: "default"} ], 6),
+    buildTestResults({a:1, b:3, total:4}, [ { amount: 5n, bucketCode: "hardWay-6", type: "default"} ]),
+    buildTestResults({a:2, b:3, total:5}, [ { amount: 5n, bucketCode: "hardWay-8", type: "default"} ], 8),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "hardWay-10", type: "default"} ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
+
+test("buildBetResults.lose-hard-ways", () => {
+  [
+    buildTestResults({a:1, b:3, total:4}, [ { amount: 5n, bucketCode: "hardWay-4", type: "default"} ], 6),
+    // lose on a 7, but only if a point is set
+    buildTestResults({a:3, b:4, total:7}, [ { amount: 5n, bucketCode: "hardWay-6", type: "default"} ], 5),
+    buildTestResults({a:5, b:3, total:8}, [ { amount: 5n, bucketCode: "hardWay-8", type: "default"} ], 8),
+    buildTestResults({a:4, b:6, total:10}, [ { amount: 5n, bucketCode: "hardWay-10", type: "default"} ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual(expect.stringContaining("hardWay-"));
+  });
+});
+
+test("buildBetResults.win-field", () => {
+  const fieldBet = { amount: 5n, bucketCode: "field", type: "default"};
+  [
+    buildTestResults({a:1, b:1, total:2}, [ fieldBet ]),
+    buildTestResults({a:1, b:2, total:3}, [ fieldBet ]),
+    buildTestResults({a:2, b:2, total:4}, [ fieldBet ], 6),
+    buildTestResults({a:5, b:4, total:9}, [ fieldBet ], 8),
+    buildTestResults({a:6, b:4, total:10}, [ fieldBet ], 5),
+    buildTestResults({a:5, b:6, total:11}, [ fieldBet ]),
+    buildTestResults({a:6, b:6, total:12}, [ fieldBet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual("field");
+  });
+});
+
+test("buildBetResults.lose-field", () => {
+  const fieldBet = { amount: 5n, bucketCode: "field", type: "default"};
+  [
+    buildTestResults({a:1, b:4, total:5}, [ fieldBet ]),
+    buildTestResults({a:4, b:2, total:6}, [ fieldBet ]),
+    buildTestResults({a:4, b:4, total:8}, [ fieldBet ], 8),
+    buildTestResults({a:3, b:4, total:7}, [ fieldBet ], 8),
+    buildTestResults({a:1, b:6, total:7}, [ fieldBet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual("field");
+  });
+});
