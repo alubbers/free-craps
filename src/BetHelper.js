@@ -1,4 +1,5 @@
-import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD} from './CrapsConstants';
+import {HARD_WAYS, ANY_CRAPS, C_AND_E, HORN, ANY_SEVEN, FIELD} from './CrapsConstants';
+import {POINT_STATES} from './RollUtils';
 
 /*
  * This class contains utility methods around determining wins/losses with bets
@@ -7,14 +8,16 @@ import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD} from './CrapsConstants';
 class BetHelper {
 
   betsAsJsonFriendly(betsToFormat) {
-    return betsToFormat.map((b) => {
-       let temp = { ...b, amount: "" };
-       if (b.amount) {
-         temp.amount = b.amount.toString();
-       }
+    return betsToFormat.map( b => this.betAsJsonFriendly(b));
+  }
 
-       return temp;
-      });
+  betAsJsonFriendly(betToFormat) {
+    let temp = { ...betToFormat, amount: "" };
+    if (betToFormat.amount) {
+      temp.amount = betToFormat.amount.toString();
+    }
+
+    return temp;
   }
 
   _pushIfNotEmpty(array, element) {
@@ -42,18 +45,20 @@ class BetHelper {
     let result = {
       totalBankChange: 0,
       winners: [],
-      losers: [],
-      updatedBets: rollFrame.activeBets.map( e => { return { ...e, id: `${e.bucketCode}-${e.type}`}; } )
+      losers: []
     };
 
     const crapsMeta = rollFrame.crapsMeta;
 
     // map the bets by bucket code and type
     let mappedBets = {};
+    let printableMappedBets = {};
     let mappedBetIds = [];
-    result.updatedBets.forEach( bet => {
-      mappedBets[bet.id] = bet;
-      mappedBetIds.push(bet.id);
+    rollFrame.activeBets.forEach( bet => {
+      const id = `${bet.bucketCode}-${bet.type}`;
+      mappedBets[id] = {...bet, id: id};
+      printableMappedBets[id] = this.betAsJsonFriendly({...bet, id: id});
+      mappedBetIds.push(id);
     });
 
     // let of bet ids that clear away after losing
@@ -86,7 +91,7 @@ class BetHelper {
         markBetLoser("dontCome-default");
       }
       else {
-        if (crapsMeta.pointState === "POINT_HIT") {
+        if (crapsMeta.pointState === POINT_STATES.pointHit) {
           this._pushIfNotEmpty(result.winners, passLineBet);
 
           markBetLoser("dontPass-default");
@@ -135,19 +140,29 @@ class BetHelper {
       }
     }
 
-    // check field bet, either wins or loses each roll
-    const fieldBetId = `${FIELD.codeFunc()}-default`;
-    // don't bother checking if it's already lost
-    if (!removedBetIds.includes(fieldBetId)) {
-      if (FIELD.values.includes(rollTotal)) {
-        this._pushIfNotEmpty(result.winners, mappedBets[fieldBetId]);
+    // check one-time bets
+    [FIELD, C_AND_E, ANY_SEVEN, ANY_CRAPS].forEach( betZone => {
+      const betId = `${betZone.codeFunc()}-default`;
+
+
+      // don't bother checking if it's already lost
+      if (!removedBetIds.includes(betId)) {
+        if (betZone.values.includes(rollTotal)) {
+          this._pushIfNotEmpty(result.winners, mappedBets[betId]);
+        }
+        else {
+          markBetLoser(betId);
+        }
       }
       else {
-        markBetLoser(fieldBetId);
       }
-    }
+    });
 
-    // create updatedBets
+    // TODO place bets
+    // horn bets
+
+
+    // create updatedBets ( other func )
 
 
     return result;
