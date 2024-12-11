@@ -2,7 +2,7 @@ export const PLACE = {
   values: [4, 5, 6, 8, 9, 10],
   type: "place",
   labelFunc: val => `${val}`,
-  verboseLabelFunc: (val, opt) => `${opt ? ( opt === "buy" ? "Buy" : "Lay") + " the " : ""}Place ${val}`,
+  verboseLabelFunc: (val, opt) => `${opt !== "default" ? ( opt === "buy" ? "Buy" : "Lay") + " the " : ""}Place ${val}`,
   codeFunc: val => `place--${val}`,
   options: ["buy", "lay"]
 };

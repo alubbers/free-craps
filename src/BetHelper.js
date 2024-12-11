@@ -98,7 +98,7 @@ class BetHelper {
           markBetLoser("come-default");
         }
 
-        if (crapsMeta.pointState === "LINE_AWAY") {
+        if (crapsMeta.pointState === POINT_STATES.lineAway) {
           // the only bets that win are the don't pass,
           // the default come bar,
           // non-default don't come bets, ( TODO )

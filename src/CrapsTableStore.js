@@ -13,6 +13,7 @@ export class CrapsTableStore {
       this.betBuckets.push({
         type: meta.type,
         label: meta.labelFunc(),
+        verboseLabel: meta.verboseLabelFunc(undefined, "default"),
         code: meta.codeFunc(),
         option: "default"
       });
@@ -36,7 +37,7 @@ export class CrapsTableStore {
     return this.betBuckets.find(e => e.code === code);
   }
 
-  buildCompleteLabelTextForCode(code) {
+  getVerboseLabelForCode(code) {
     const bucket = this.getBucketForCode(code);
 
     if (bucket) {
