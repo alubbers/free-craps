@@ -1,4 +1,4 @@
-import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD_VALUES} from './CrapsTableStore';
+import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD} from './CrapsConstants';
 
 /*
  * This class contains utility methods around determining wins/losses with bets
@@ -118,27 +118,28 @@ class BetHelper {
     }
 
     // analyze number result for specific bets
+    const rollTotal = rollFrame.roll.total;
 
     // Hard ways
-    if (HARD_WAYS.includes(rollFrame.roll.total)) {
-      let hardId = `hardWay-${rollFrame.roll.total}-default`;
+    if (HARD_WAYS.values.includes(rollTotal)) {
+      let hardId = `${HARD_WAYS.codeFunc(rollTotal)}-default`;
 
       // if the bet isn't already determined to be a loser
       if (!removedBetIds.includes(hardId)) {
         if (crapsMeta.hardWay) {
-          this._pushIfNotEmpty(result.winners, mappedBets[`hardWay-${rollFrame.roll.total}-default`]);
+          this._pushIfNotEmpty(result.winners, mappedBets[hardId]);
         }
         else {
-          markBetLoser(`hardWay-${rollFrame.roll.total}-default`);
+          markBetLoser(hardId);
         }
       }
     }
 
     // check field bet, either wins or loses each roll
-    const fieldBetId = 'field-default';
+    const fieldBetId = `${FIELD.codeFunc()}-default`;
     // don't bother checking if it's already lost
     if (!removedBetIds.includes(fieldBetId)) {
-      if (FIELD_VALUES.includes(rollFrame.roll.total)) {
+      if (FIELD.values.includes(rollTotal)) {
         this._pushIfNotEmpty(result.winners, mappedBets[fieldBetId]);
       }
       else {

@@ -6,7 +6,8 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 
 import IdlingComponent from './IdlingComponent';
-import {HARD_WAYS, ANY_CRAPS, C_AND_E, FIELD_VALUES, CrapsTableStore} from './CrapsTableStore';
+import CrapsTableStore from './CrapsTableStore';
+import {HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
 import {POINT_STATES, RollUtils} from './RollUtils';
 
 import logo from './logo.svg';
@@ -34,10 +35,10 @@ class CrapsTable extends Component {
 
         if (e.type === 'place') {
           if (lastTotal + '' === e.label) {
-            if (lastRoll.crapsMeta.pointState === "POINT_SET") {
+            if (lastRoll.crapsMeta.pointState === POINT_STATES.pointSet) {
               variant = "outline-dark";
             }
-            else if (lastRoll.crapsMeta.pointState === "POINT_HIT") {
+            else if (lastRoll.crapsMeta.pointState === POINT_STATES.pointHit) {
               variant = "outline-success";
             }
             else {
@@ -74,7 +75,7 @@ class CrapsTable extends Component {
             }
           }
         }
-        else if (e.type === 'hardWay') {
+        else if (e.type === HARD_WAYS.type) {
           if (lastTotal + '' === e.label) {
             if (lastRoll.crapsMeta.hardWay) {
               variant = "outline-primary";
@@ -84,31 +85,19 @@ class CrapsTable extends Component {
             }
           }
         }
-        else if (e.type === 'horn') {
-          if (lastTotal + '' === e.label) {
-            variant = "outline-primary";
-          }
+
+        if (e.type === HORN.type && `${lastTotal}` === e.label) {
+          variant = "outline-primary";
         }
-        else if (e.type === 'anySeven') {
-          if (lastTotal === 7) {
-            variant = "outline-primary";
+
+        let groupedZones = [ANY_SEVEN, ANY_CRAPS, C_AND_E, FIELD]
+        groupedZones.forEach(betZone => {
+          if (e.type === betZone.type) {
+            if (betZone.values.includes(lastTotal)) {
+              variant = "outline-primary";
+            }
           }
-        }
-        else if (e.type === 'anyCraps') {
-          if (ANY_CRAPS.includes(lastTotal)) {
-            variant = "outline-primary";
-          }
-        }
-        else if (e.type === 'c-and-e') {
-          if (C_AND_E.includes(lastTotal)) {
-            variant = "outline-primary";
-          }
-        }
-        else if (e.type === 'field') {
-          if (FIELD_VALUES.includes(lastTotal)) {
-            variant = "outline-primary";
-          }
-        }
+        });
 
         return {
           key: e.code,
@@ -123,13 +112,13 @@ class CrapsTable extends Component {
 
     return mappedVariants;
   }
-  
+
   getBucketClickFunction() {
     let result = (code) => {};
     if (this.props.bucketClick) {
       result = (code) => this.props.bucketClick(code);
     }
-    
+
     return result;
   }
 
@@ -161,32 +150,32 @@ class CrapsTable extends Component {
       setTwo: (<ButtonGroup style={{width: "100%"}}>{setTwoBuckets}</ButtonGroup>)
     }
   }
-  
+
   buildBucketButton(mappedVariants, bucket) {
     let result = <></>;
-      
+
     if (bucket) {
       const bucketClickFunction = this.getBucketClickFunction();
-      
+
       result = ( <Button id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket.code)} variant={mappedVariants[bucket.code]}>
             {bucket.label}
           </Button>
           );
     }
-    
+
     return result;
   }
-  
+
   buildHardWayComponentMap(mappedVariants) {
     let componentMap = {};
-    
-    HARD_WAYS.forEach((hardWayNum) => {
-      const code = `hardWay-${hardWayNum}`;
+
+    HARD_WAYS.values.forEach((hardWayNum) => {
+      const code = HARD_WAYS.codeFunc(hardWayNum);
       const bucket = this.store.getBucketForCode(code);
-      
+
       componentMap[code] = this.buildBucketButton(mappedVariants, bucket);
     });
-    
+
     return componentMap;
   }
 
@@ -195,7 +184,7 @@ class CrapsTable extends Component {
     let mappedVariants = this.buildMappedVariants();
 
     const placeBetButtonGroups = this.buildPlaceBetComponents(mappedVariants);
-    
+
     const hardWayComponents = this.buildHardWayComponentMap(mappedVariants);
 
     let fieldTextColor = "yellow";
@@ -222,12 +211,12 @@ class CrapsTable extends Component {
               <Col xs="12">
                 <div style={{width: "1%", float: "left"}}>H A R D</div>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  {hardWayComponents["hardWay-4"]}
-                  {hardWayComponents["hardWay-8"]}
+                  {hardWayComponents[HARD_WAYS.codeFunc("4")]}
+                  {hardWayComponents[HARD_WAYS.codeFunc("8")]}
                 </ButtonGroup>
                 <ButtonGroup vertical style={{ height: "100%"}}>
-                  {hardWayComponents["hardWay-6"]}
-                  {hardWayComponents["hardWay-10"]}
+                  {hardWayComponents[HARD_WAYS.codeFunc("6")]}
+                  {hardWayComponents[HARD_WAYS.codeFunc("10")]}
                 </ButtonGroup>
               </Col>
             </Row>
