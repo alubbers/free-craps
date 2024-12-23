@@ -102,6 +102,27 @@ test("buildBetResults.lose-pass-line-with-odds-line-away", () => {
   });
 });
 
+test("buildBetResults.no-change-pass-line", () => {
+  const testRollsAndPoints = [
+    [ {a: 6, b: 5, total: 11}, 6],
+    [ {a: 8, b: 1, total: 9}, undefined],
+    [ {a: 3, b: 2, total: 5}, 10],
+  ];
+
+  const bets = [
+    [ { amount: 5n, bucketCode: "pass", type: "default"} ],
+    [ { amount: 5n, bucketCode: "pass", type: "default"}, { amount: 10n, bucketCode: "pass", type: "odds"} ]
+  ];
+
+  testRollsAndPoints.forEach(roll => {
+    bets.forEach(bet => {
+      const result = buildTestResults( roll[0], bet, roll[1] );
+
+      expect(result.winners.length).toEqual(0);
+      expect(result.losers.length).toEqual(0);
+    });
+  });
+});
 
 test("buildBetResults.win-dont-pass-bar-no-point-set", () => {
   const testRolls = [
@@ -128,6 +149,28 @@ test("buildBetResults.push-12-dont-pass-bar", () => {
   expect(result.winners.length).toEqual(0);
   expect(result.losers.length).toEqual(0);
 
+});
+
+test("buildBetResults.no-change-dont-pass-bar", () => {
+  const testRollsAndPoints = [
+    [ {a: 6, b: 5, total: 11}, 6],
+    [ {a: 8, b: 1, total: 9}, undefined],
+    [ {a: 3, b: 2, total: 5}, 10],
+  ];
+
+  const bets = [
+    [ { amount: 5n, bucketCode: "dontPass", type: "default"} ],
+    [ { amount: 5n, bucketCode: "dontPass", type: "default"}, { amount: 10n, bucketCode: "dontPass", type: "odds"} ]
+  ];
+
+  testRollsAndPoints.forEach(roll => {
+    bets.forEach(bet => {
+      const result = buildTestResults( roll[0], bet, roll[1] );
+
+      expect(result.winners.length).toEqual(0);
+      expect(result.losers.length).toEqual(0);
+    });
+  });
 });
 
 test("buildBetResults.win-dont-pass-bar-point-set", () => {
@@ -360,6 +403,8 @@ test("buildBetResults.lose-anySeven", () => {
   });
 });
 
+// TODO come bets
+
 // TODO place bet tests
 
-// todo HORN bets
+// TODO HORN bets
