@@ -1,9 +1,13 @@
+const _DEFAULT_OPTION_SUFFIX = "-default";
+
+export const POINTS = [4, 5, 6, 8, 9, 10]
+
 export const PLACE = {
-  values: [4, 5, 6, 8, 9, 10],
+  values: POINTS,
   type: "place",
   labelFunc: val => `${val}`,
   verboseLabelFunc: (val, opt) => `${opt !== "default" ? ( opt === "buy" ? "Buy" : "Lay") + " the " : ""}Place ${val}`,
-  codeFunc: val => `place--${val}`,
+  codeFunc: (val, opt) => `place-${val}${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
   options: ["buy", "lay"]
 };
 
@@ -12,7 +16,7 @@ export const HARD_WAYS = {
   type: "hardWay",
   labelFunc: val => `${val}`,
   verboseLabelFunc: val => `Hard ${val}`,
-  codeFunc: val => `hardWay-${val}`,
+  codeFunc: (val, opt) => `hardWay-${val}-default`,
   options: []
 };
 
@@ -21,43 +25,43 @@ export const HORN = {
   type: "horn",
   labelFunc: val => `${val}`,
   verboseLabelFunc: val => `Horn ${val}`,
-  codeFunc: val => `horn-${val}`,
+  codeFunc: (val, opt) => `horn-${val}-default`,
   options: []
 };
 
 export const ANY_CRAPS = {
   values: [2, 3, 12],
   type: "anyCraps",
-  labelFunc: val => "Any Craps",
-  verboseLabelFunc: val => "Any Craps",
-  codeFunc: val => "anyCraps",
+  labelFunc: () => "Any Craps",
+  verboseLabelFunc: () => "Any Craps",
+  codeFunc: () => "anyCraps-default",
   options: []
 };
 
 export const C_AND_E = {
   values: [2, 3, 11, 12],
   type: "c-and-e",
-  labelFunc: val => "C & E",
-  verboseLabelFunc: val => "C & E",
-  codeFunc: val => "c-and-e",
+  labelFunc: () => "C & E",
+  verboseLabelFunc: () => "C & E",
+  codeFunc: () => "c-and-e-default",
   options: []
 };
 
 export const FIELD = {
   values: [2, 3, 4, 9, 10, 11, 12],
   type: "field",
-  labelFunc: val => "Field",
-  verboseLabelFunc: val => "Field",
-  codeFunc: val => "field",
+  labelFunc: () => "Field",
+  verboseLabelFunc: () => "Field",
+  codeFunc: () => "field-default",
   options: []
 };
 
 export const ANY_SEVEN = {
   values: [7],
   type: "anySeven",
-  labelFunc: val => "Any Seven",
-  verboseLabelFunc: val => "Any Seven",
-  codeFunc: val => "anySeven",
+  labelFunc: () => "Any Seven",
+  verboseLabelFunc: () => "Any Seven",
+  codeFunc: () => "anySeven-default",
   options: []
 };
 
@@ -68,7 +72,7 @@ export const PASS = {
   type: "pass",
   labelFunc: val => "Pass Line",
   verboseLabelFunc: (val, opt) => `Pass Line${opt === "odds" ? " Odds" : ""}`,
-  codeFunc: val => "pass",
+  codeFunc: (val, opt) => `pass${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
   options: ["odds"]
 };
 
@@ -76,7 +80,7 @@ export const DONT_PASS = {
   type: "pass",
   labelFunc: val => "Don't Pass Bar",
   verboseLabelFunc: (val, opt) => `Dont't Pass ${opt === "odds" ? "Odds" : "Bar"}`,
-  codeFunc: val => "dontPass",
+  codeFunc: (val, opt) => `dontPass${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
   options: ["odds"]
 };
 
@@ -84,7 +88,7 @@ export const COME = {
   type: "come",
   labelFunc: val => "Come",
   verboseLabelFunc: (val, opt) => `Come${opt === "odds" ? " Odds" : ""}`,
-  codeFunc: val => "come",
+  codeFunc: (val, opt) => `come${val ? "-" + val : ""}${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
   options: ["odds"]
 };
 
@@ -92,6 +96,6 @@ export const DONT_COME = {
   type: "come",
   labelFunc: val => "Don't Come",
   verboseLabelFunc: (val, opt) => `Don't Come${opt === "odds" ? " Odds" : ""}`,
-  codeFunc: val => "dontCome",
+  codeFunc: (val, opt) => `dontCome${val ? "-" + val : ""}${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
   options: ["odds"]
 };

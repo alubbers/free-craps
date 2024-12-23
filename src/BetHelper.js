@@ -1,4 +1,4 @@
-import {HARD_WAYS, ANY_CRAPS, C_AND_E, HORN, ANY_SEVEN, FIELD} from './CrapsConstants';
+import {POINTS, PASS, DONT_PASS, COME, DONT_COME, HARD_WAYS, ANY_CRAPS, C_AND_E, HORN, ANY_SEVEN, FIELD, PLACE} from './CrapsConstants';
 import {POINT_STATES} from './RollUtils';
 
 /*
@@ -32,7 +32,7 @@ class BetHelper {
    * @param rollFrame a map of 3 properties:
    *   roll:  The roll result from RollUtils
    *   crapsMeta:  The metadata about the roll result -- See RollUtils.buildCrapsResult for more details
-   *   activeBets: the bets in place for the roll
+   *   activeBets: the working bets in place for the roll
    *
    * @return {
    *   totalBankChange: total change in bank from all bets for the roll
@@ -49,6 +49,8 @@ class BetHelper {
     };
 
     const crapsMeta = rollFrame.crapsMeta;
+
+    const rollTotal = rollFrame.roll.total;
 
     // map the bets by bucket code and type
     let mappedBets = {};
@@ -72,67 +74,100 @@ class BetHelper {
       this._pushIfNotEmpty(result.losers, bet);
     };
 
-    const passLineBet = mappedBets["pass-default"];
-    const dontPassBet = mappedBets["dontPass-default"];
+    let markBetWinner = (code) => {
+      const bet = mappedBets[code];
+
+      if (!removedBetIds.includes(code)) {
+        this._pushIfNotEmpty(result.winners, bet);
+      }
+    }
+
     if (crapsMeta.craps) {
-      markBetLoser("pass-default");
+      markBetLoser(PASS.codeFunc());
 
       // Traditionally, a don't pass bet on a 12 is a 'push' , i.e. a tie, so it doesn't win or lose
       if (rollFrame.roll.total !== 12) {
-        this._pushIfNotEmpty(result.winners, dontPassBet);
+        markBetWinner(DONT_PASS.codeFunc());
       }
     }
     else {
-      if (crapsMeta.passLineWin) {
-        this._pushIfNotEmpty(result.winners, passLineBet);
-        this._pushIfNotEmpty(result.winners, mappedBets["come-default"]);
+      // check for all conditions for a roll of 7 below, just check for the 11 here
+      if (crapsMeta.passLineWin && rollTotal === 11) {
+        markBetWinner(PASS.codeFunc());
+        markBetWinner(COME.codeFunc());
 
-        markBetLoser("dontPass-default");
-        markBetLoser("dontCome-default");
+        markBetLoser(DONT_PASS.codeFunc());
+        markBetLoser(DONT_COME.codeFunc());
       }
       else {
         if (crapsMeta.pointState === POINT_STATES.pointHit) {
-          this._pushIfNotEmpty(result.winners, passLineBet);
+          // if the point is hit, the pass line default and odds bet both win
+          markBetWinner(PASS.codeFunc());
+          markBetWinner(PASS.codeFunc(undefined, "odds"));
 
-          markBetLoser("dontPass-default");
-          markBetLoser("come-default");
-        }
-
-        if (crapsMeta.pointState === POINT_STATES.lineAway) {
-          // the only bets that win are the don't pass,
-          // the default come bar,
-          // non-default don't come bets, ( TODO )
-          // lay bets, ( TODO )
-          // and Any Seven
-          const winningIds = [
-            "dontPass-default",
-            "come-default",
-            "anySeven-default"
-          ];
-
-          mappedBetIds.forEach( id => {
-            if (winningIds.includes(id)) {
-              this._pushIfNotEmpty(result.winners, mappedBets[id]);
-            }
-            else {
-              markBetLoser(id);
-            }
-          });
+          markBetLoser(DONT_PASS.codeFunc());
+          markBetLoser(DONT_PASS.codeFunc(undefined, "odds"));
+          markBetLoser(DONT_COME.codeFunc(rollTotal));
+          markBetLoser(DONT_COME.codeFunc(rollTotal, "odds"));
         }
       }
     }
 
-    // analyze number result for specific bets
-    const rollTotal = rollFrame.roll.total;
+    // Since all given bets are assumed to be working,
+    // gather up anything else that wins and loses on a seven in one place
+    if (rollTotal === 7) {
+      /*
+           if 7 is rolled, and your bet is working, it loses, except these, which all win:
+           any don't come bets on any points ( default and odds )
+           the default come bet
+           any seven
+           place lay bets
+
+           If the point was set when 7 was rolled, then any don't pass bets win ( default and odds )
+           If the point was off, then any pass bets win ( default only valid  when point off )
+      */
+
+      let winningIds = [
+        COME.codeFunc(),
+        ANY_SEVEN.codeFunc()
+      ];
+
+      POINTS.forEach( pointNum => {
+        winningIds.push(DONT_COME.codeFunc(pointNum, "default"));
+        winningIds.push(DONT_COME.codeFunc(pointNum, "odds"));
+        winningIds.push(PLACE.codeFunc(pointNum, "lay"));
+      });
+
+      if (crapsMeta.pointState === POINT_STATES.lineAway) {
+        winningIds.push(DONT_PASS.codeFunc());
+        winningIds.push(DONT_PASS.codeFunc(undefined, "odds"));
+      }
+      else {
+        winningIds.push(PASS.codeFunc());
+      }
+
+      mappedBetIds.forEach( id => {
+        if (winningIds.includes(id)) {
+          markBetWinner(id);
+        }
+        else {
+          markBetLoser(id);
+        }
+      });
+    }
+    else {
+      // Any Seven is a one time bet, so if the roll isn't a 7, it loses
+      markBetLoser(ANY_SEVEN.codeFunc());
+    }
 
     // Hard ways
     if (HARD_WAYS.values.includes(rollTotal)) {
-      let hardId = `${HARD_WAYS.codeFunc(rollTotal)}-default`;
+      const hardId = `${HARD_WAYS.codeFunc(rollTotal)}`;
 
       // if the bet isn't already determined to be a loser
       if (!removedBetIds.includes(hardId)) {
         if (crapsMeta.hardWay) {
-          this._pushIfNotEmpty(result.winners, mappedBets[hardId]);
+          markBetWinner(hardId);
         }
         else {
           markBetLoser(hardId);
@@ -141,14 +176,14 @@ class BetHelper {
     }
 
     // check one-time bets
-    [FIELD, C_AND_E, ANY_SEVEN, ANY_CRAPS].forEach( betZone => {
-      const betId = `${betZone.codeFunc()}-default`;
+    [FIELD, C_AND_E, ANY_CRAPS, HORN].forEach( betZone => {
+      const betId = `${betZone.codeFunc()}`;
 
 
       // don't bother checking if it's already lost
       if (!removedBetIds.includes(betId)) {
         if (betZone.values.includes(rollTotal)) {
-          this._pushIfNotEmpty(result.winners, mappedBets[betId]);
+          markBetWinner(betId);
         }
         else {
           markBetLoser(betId);
@@ -158,9 +193,16 @@ class BetHelper {
       }
     });
 
-    // TODO place bets
-    // horn bets
+    // check for a place bet, which don't lose if the chosen value is missed
+    if (PLACE.values.includes(rollTotal)) {
+      const placeId = `${PLACE.codeFunc(rollTotal)}`;
 
+      markBetWinner(placeId);
+    }
+
+    // TODO place buy bets
+
+    // TODO update removedBetIds  ( odds after pass line win )
 
     // create updatedBets ( other func )
 
