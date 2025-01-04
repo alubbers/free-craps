@@ -84,10 +84,12 @@ class BetHelper {
 
     if (crapsMeta.craps) {
       markBetLoser(PASS.codeFunc());
+      markBetLoser(COME.codeFunc());
 
       // Traditionally, a don't pass bet on a 12 is a 'push' , i.e. a tie, so it doesn't win or lose
       if (rollFrame.roll.total !== 12) {
         markBetWinner(DONT_PASS.codeFunc());
+        markBetWinner(DONT_COME.codeFunc());
       }
     }
     else {
@@ -107,8 +109,6 @@ class BetHelper {
 
           markBetLoser(DONT_PASS.codeFunc());
           markBetLoser(DONT_PASS.codeFunc(undefined, "odds"));
-          markBetLoser(DONT_COME.codeFunc(rollTotal));
-          markBetLoser(DONT_COME.codeFunc(rollTotal, "odds"));
         }
       }
     }
@@ -162,7 +162,7 @@ class BetHelper {
 
     // Hard ways
     if (HARD_WAYS.values.includes(rollTotal)) {
-      const hardId = `${HARD_WAYS.codeFunc(rollTotal)}`;
+      const hardId = HARD_WAYS.codeFunc(rollTotal);
 
       // if the bet isn't already determined to be a loser
       if (!removedBetIds.includes(hardId)) {
@@ -177,7 +177,7 @@ class BetHelper {
 
     // check one-time bets
     [FIELD, C_AND_E, ANY_CRAPS, HORN].forEach( betZone => {
-      const betId = `${betZone.codeFunc()}`;
+      const betId = betZone.codeFunc();
 
 
       // don't bother checking if it's already lost
@@ -195,12 +195,18 @@ class BetHelper {
 
     // check for a place bet, which don't lose if the chosen value is missed
     if (PLACE.values.includes(rollTotal)) {
-      const placeId = `${PLACE.codeFunc(rollTotal)}`;
-
-      markBetWinner(placeId);
+      markBetWinner(PLACE.codeFunc(rollTotal));
+      markBetWinner(PLACE.codeFunc(rollTotal, 'buy'));
     }
 
-    // TODO place buy bets
+    // check for a come or don't come bet if a point number was rolled
+    if (POINTS.includes(rollTotal)) {
+      markBetWinner(COME.codeFunc(rollTotal));
+      markBetWinner(COME.codeFunc(rollTotal, 'odds'));
+      markBetLoser(DONT_COME.codeFunc(rollTotal));
+      markBetLoser(DONT_COME.codeFunc(rollTotal, 'odds'));
+    }
+
 
     // TODO update removedBetIds  ( odds after pass line win )
 
