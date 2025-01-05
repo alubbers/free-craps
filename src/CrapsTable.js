@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 
 import IdlingComponent from './IdlingComponent';
 import CrapsTableStore from './CrapsTableStore';
-import {HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
+import {PASS, DONT_PASS, COME, DONT_COME, HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
 import {POINT_STATES, RollUtils} from './RollUtils';
 
 import logo from './logo.svg';
@@ -223,8 +223,8 @@ class CrapsTable extends Component {
             <Row>
               <Col xs="12">
                 <ButtonGroup>
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("c-and-e"))}
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("anySeven"))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(C_AND_E.codeFunc()))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(ANY_SEVEN.codeFunc()))}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -234,27 +234,29 @@ class CrapsTable extends Component {
           <Col xs="7">
             <Row>
               <Col>
-                {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("field"))}
+                <ButtonGroup style={{width: "100%"}}>
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(FIELD.codeFunc()))}
+                </ButtonGroup>
               </Col>
             </Row>
             <Row>
               <Col xs="12">
                 <ButtonGroup style={{width: "100%"}}>
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("pass"))}
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("dontPass"))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()))}
+                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()))}
                 </ButtonGroup>
               </Col>
             </Row>
           </Col>
           <Col xs="5">
             <div style={{width: "1%", float: "left"}}>H O R N</div>
-            <ButtonGroup vertical style={{ height: "100%"}}>
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-2"))}
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-11"))}
+            <ButtonGroup key="hornGroup-1" vertical style={{ height: "100%"}}>
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(2)))}
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(11)))}
             </ButtonGroup>
-            <ButtonGroup vertical style={{ height: "100%"}}>
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-3"))}
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode("horn-12"))}
+            <ButtonGroup key="hornGroup-2" vertical style={{ height: "100%"}}>
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(3)))}
+              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(12)))}
             </ButtonGroup>
           </Col>
         </Row>

@@ -17,6 +17,8 @@ class SoloStore {
 
   games = [];
 
+  lastBetResult = {};
+
   ready = true;
 
   betTracker = new BetTracker();
@@ -74,9 +76,9 @@ class SoloStore {
 
     this.currentGame.rolls.push(rollFrame);
 
-    const betResults = betHelper.buildBetResults(rollFrame);
+    this.lastBetResult = betHelper.buildBetResults(rollFrame);
 
-    console.log(`There were ${betResults.winners.length} winning bets`);
+    console.log(`There were ${this.lastBetResult.winners.length} winning bets`);
 
     if (crapsResult.newPoint !== -1) {
       this.currentGame.point = crapsResult.newPoint;
