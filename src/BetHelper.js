@@ -175,10 +175,9 @@ class BetHelper {
       }
     }
 
-    // check one-time bets
-    [FIELD, C_AND_E, ANY_CRAPS, HORN].forEach( betZone => {
+    // check one-time group bets
+    [FIELD, C_AND_E, ANY_CRAPS].forEach( betZone => {
       const betId = betZone.codeFunc();
-
 
       // don't bother checking if it's already lost
       if (!removedBetIds.includes(betId)) {
@@ -189,7 +188,19 @@ class BetHelper {
           markBetLoser(betId);
         }
       }
-      else {
+    });
+
+    // check horn bets
+    HORN.values.forEach( hornVal => {
+      const betId = HORN.codeFunc(hornVal);
+
+      if (!removedBetIds.includes(betId)) {
+        if (rollTotal === hornVal) {
+          markBetWinner(betId);
+        }
+        else {
+          markBetLoser(betId);
+        }
       }
     });
 
@@ -197,6 +208,7 @@ class BetHelper {
     if (PLACE.values.includes(rollTotal)) {
       markBetWinner(PLACE.codeFunc(rollTotal));
       markBetWinner(PLACE.codeFunc(rollTotal, 'buy'));
+      markBetLoser(PLACE.codeFunc(rollTotal, 'lay'));
     }
 
     // check for a come or don't come bet if a point number was rolled

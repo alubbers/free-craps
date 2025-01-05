@@ -30,6 +30,8 @@ const comeBet = { amount: 5n, bucketCode: "come", type: "default" };
 
 const dontComeBet = { amount: 5n, bucketCode: "dontCome", type: "default" };
 
+const hornBetFunc = (val) => { return { amount: 5n, bucketCode: `horn-${val}`, type: "default" } };
+
 
 test("buildBetResults.win-pass-line-no-point", () => {
 
@@ -499,7 +501,7 @@ test("buildBetResults.win-come-points", () => {
   ].forEach( result => {
     expect(result.winners.length).toEqual(1);
     expect(result.losers.length).toEqual(0);
-    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('come'))
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('come'));
   });
 });
 
@@ -519,8 +521,8 @@ test("buildBetResults.win-come-points-with-odds", () => {
 
 test("buildBetResults.push-come-points", () => {
   [
-    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "come-5", type: "default"}, { amount: 10n, bucketCode: "come-5", type: "odds"} ], 4),
-    buildTestResults({a:6, b:5, total:11}, [ { amount: 5n, bucketCode: "come-4", type: "default"}, { amount: 10n, bucketCode: "come-4", type: "odds"}  ]),
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "come-5", type: "default"} ], 4),
+    buildTestResults({a:6, b:5, total:11}, [ { amount: 5n, bucketCode: "come-4", type: "default"} ]),
     buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "come-4", type: "default"}, { amount: 10n, bucketCode: "come-4", type: "odds"}  ]),
     buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "come-4", type: "default"}, { amount: 10n, bucketCode: "come-4", type: "odds"}  ], 10),
     buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "come-10", type: "default"}, { amount: 10n, bucketCode: "come-10", type: "odds"}  ], 9)
@@ -537,7 +539,7 @@ test("buildBetResults.lose-come-points", () => {
   ].forEach( result => {
     expect(result.winners.length).toEqual(0);
     expect(result.losers.length).toEqual(1);
-    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('come'))
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('come'));
   });
 });
 
@@ -561,7 +563,7 @@ test("buildBetResults.win-dont-come-points", () => {
   ].forEach( result => {
     expect(result.winners.length).toEqual(1);
     expect(result.losers.length).toEqual(0);
-    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('dontCome'))
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('dontCome'));
   });
 });
 
@@ -599,7 +601,7 @@ test("buildBetResults.lose-dont-come-points", () => {
   ].forEach( result => {
     expect(result.winners.length).toEqual(0);
     expect(result.losers.length).toEqual(1);
-    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('dontCome'))
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('dontCome'));
   });
 });
 
@@ -618,7 +620,143 @@ test("buildBetResults.lose-dont-come-points-with-odds", () => {
 });
 
 
+test("buildBetResults.win-place", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ], 4),
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ]),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-9", type: "default"} ], 4)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
 
-// TODO place bet ( default, buy, lay ) tests
+test("buildBetResults.push-place", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-5", type: "default"} ], 4),
+    buildTestResults({a:6, b:5, total:11}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ], 10),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-10", type: "default"} ], 9)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
 
-// TODO HORN bets
+test("buildBetResults.lose-place", () => {
+  [
+    buildTestResults({a:6, b:1, total:7}, [ { amount: 5n, bucketCode: "place-4", type: "default"} ], 4),
+    buildTestResults({a:2, b:5, total:7}, [ { amount: 5n, bucketCode: "place-8", type: "default"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
+
+test("buildBetResults.win-place-buy", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ], 4),
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ]),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-9", type: "buy"} ], 4)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
+
+test("buildBetResults.push-place-buy", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-5", type: "buy"} ], 4),
+    buildTestResults({a:6, b:5, total:11}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ], 10),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-10", type: "buy"} ], 9)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
+
+test("buildBetResults.lose-place-buy", () => {
+  [
+    buildTestResults({a:6, b:1, total:7}, [ { amount: 5n, bucketCode: "place-4", type: "buy"} ], 4),
+    buildTestResults({a:2, b:5, total:7}, [ { amount: 5n, bucketCode: "place-8", type: "buy"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
+
+test("buildBetResults.win-place-lay", () => {
+  [
+    buildTestResults({a:6, b:1, total:7}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ], 4),
+    buildTestResults({a:2, b:5, total:7}, [ { amount: 5n, bucketCode: "place-8", type: "lay"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
+
+test("buildBetResults.push-place-lay", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-5", type: "lay"} ], 4),
+    buildTestResults({a:6, b:5, total:11}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ]),
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ], 10),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-10", type: "lay"} ], 9)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
+
+test("buildBetResults.lose-place-lay", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ], 4),
+    buildTestResults({a:2, b:2, total:4}, [ { amount: 5n, bucketCode: "place-4", type: "lay"} ]),
+    buildTestResults({a:6, b:3, total:9}, [ { amount: 5n, bucketCode: "place-9", type: "lay"} ], 4)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('place'));
+  });
+});
+
+test("buildBetResults.win-horn", () => {
+
+  [
+    buildTestResults({a:1, b:1, total:2}, [ hornBetFunc(2) ]),
+    buildTestResults({a:1, b:2, total:3}, [ hornBetFunc(3) ], 4),
+    buildTestResults({a:6, b:6, total:12}, [ hornBetFunc(12) ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.winners[0].bucketCode).toEqual(expect.stringMatching('horn'));
+  });
+});
+
+test("buildBetResults.lose-horn", () => {
+  [
+    buildTestResults({a:2, b:2, total:4}, [ hornBetFunc(3) ], 6),
+    buildTestResults({a:5, b:4, total:9}, [ hornBetFunc(11) ], 8),
+    buildTestResults({a:6, b:4, total:10}, [ hornBetFunc(12) ], 5),
+    buildTestResults({a:5, b:6, total:11}, [ hornBetFunc(12) ]),
+    buildTestResults({a:1, b:4, total:5}, [ hornBetFunc(12) ]),
+    buildTestResults({a:4, b:2, total:6}, [ hornBetFunc(12) ]),
+    buildTestResults({a:4, b:4, total:8}, [ hornBetFunc(12) ], 8),
+    buildTestResults({a:3, b:4, total:7}, [ hornBetFunc(12) ], 8),
+    buildTestResults({a:1, b:6, total:7}, [ hornBetFunc(2) ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.losers[0].bucketCode).toEqual(expect.stringMatching('horn'));
+  });
+});
+
+// TODO multi-bets
