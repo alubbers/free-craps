@@ -759,4 +759,27 @@ test("buildBetResults.lose-horn", () => {
   });
 });
 
-// TODO multi-bets
+test("buildBetResults.multi-bets", () => {
+
+  let multiResult = buildTestResults({a:1, b:1, total:2}, [ hornBetFunc(2), fieldBet, comeBet ]);
+
+  expect(multiResult.winners.length).toEqual(2);
+  expect(multiResult.losers.length).toEqual(1);
+  expect(multiResult.losers[0].bucketCode).toEqual('come');
+
+  multiResult = buildTestResults({a:2, b:2, total:4}, [
+    { amount: 5n, bucketCode: "place-4", type: "lay"},
+    { amount: 5n, bucketCode: "pass", type: "default"},
+    { amount: 5n, bucketCode: "pass", type: "odds"},
+    fieldBet ], 4);
+
+  expect(multiResult.winners.length).toEqual(3);
+  expect(multiResult.losers.length).toEqual(1);
+
+  multiResult.winners.forEach(winner => {
+    if(winner.bucketCode !== 'field') {
+      expect(winner.bucketCode).toEqual('pass');
+    }
+  });
+
+});
