@@ -27,19 +27,19 @@ class BetTracker {
     return this.bets;
   }
 
-  getBetsForBucket(bucketCode) {
-	  return this.bets.filter( b => b.bucketCode === bucketCode );
+  getBetsForGroup(groupCode) {
+    return this.bets.filter( b => b.groupCode === groupCode );
   }
 
  /**
   * make a new bet or change an existing one
-  * The type param specifies things like "odds", "lay", "come bet odds",
-  * or other notations of the bet type within a bucket
+  * The option param specifies things like "odds", "lay", "come bet odds",
+  * or other notations of the bet option within a bucket
   */
-  makeBet(amount, bucketCode, type = "default") {
+  makeBet(amount, groupCode, option = "default") {
     let bankDelta = 0n;
 
-    let existingBet = this.bets.find( b => b.bucketCode === bucketCode && b.type === type );
+    let existingBet = this.bets.find( b => b.groupCode === groupCode && b.option === option );
 
     if (existingBet === undefined) {
       // make a new bet
@@ -47,8 +47,9 @@ class BetTracker {
 
       this.bets.push({
         amount: amount,
-        bucketCode: bucketCode,
-        type: type
+        groupCode: groupCode,
+        option: option,
+        bucketCode: `${groupCode}-${option}`
       });
     }
     else {

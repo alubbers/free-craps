@@ -5,6 +5,7 @@ import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTable from './CrapsTable';
+import CrapsTableStore from './CrapsTableStore';
 import { BetsModal, MakeBetModal } from './BetModals';
 import { observer } from "mobx-react"
 
@@ -17,8 +18,8 @@ const Solo = observer(({ store }) => {
 	};
 
 	let makeBetModal = {
-	  show: store.makeBetModalBucketCode !== undefined,
-	  code: store.makeBetModalBucketCode,
+	  show: store.makeBetModalBucket !== undefined,
+		bucket: store.makeBetModalBucket,
 	  value: "0"
 	};
 
@@ -41,6 +42,7 @@ class SoloView extends Component {
 
   componentDidMount() {
     this.store = this.props.soloStore;
+		this.crapsTableStore = new CrapsTableStore();
   }
 
   rollDice() {
@@ -59,8 +61,8 @@ class SoloView extends Component {
     this.store.hideBetsModal();
   }
 
-  betBucketClicked(code) {
-    this.store.showMakeBetModal(code);
+	betBucketClicked(bucket) {
+		this.store.showMakeBetModal(bucket);
   }
 
   hideMakeBetModal() {
@@ -93,6 +95,15 @@ class SoloView extends Component {
       const rollRows = rollElementList.map( (e, index) => {
         let details = [];
 
+				// build results on bets
+				e.betResult.winners.forEach((item, i) => {
+					details.push(<Alert key={`winner-${i}`} variant="success">Bet of ${item.amount.toString()} on {this.crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} wins!!</Alert>);
+				});
+
+				e.betResult.losers.forEach((item, i) => {
+					details.push(<Alert key={`loser-${i}`} variant="danger">Bet of ${item.amount.toString()} on {this.crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} loses ...</Alert>);
+				});
+
         if (e.crapsMeta.craps) {
           details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger">Craps! Pass Line loses</Alert>);
         }
@@ -110,7 +121,7 @@ class SoloView extends Component {
             }
 
             if (e.crapsMeta.pointState === "LINE_AWAY") {
-              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger">Seven Line Away ...</Alert>);
+							details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger"><strong>Seven Line Away ...</strong></Alert>);
             }
           }
 
@@ -120,29 +131,27 @@ class SoloView extends Component {
         }
 
         return <>
+						<Row>
+							<Col xs="5">
+								<hr/>
+							</Col>
+							<Col xs="2" style={{padding: "0px"}}>
+								Roll {rollElementList.length - (index)}
+							</Col>
+							<Col xs="5">
+								<hr/>
+							</Col>
+						</Row>
             <Alert key={`roll-${index}-basic`} variant="dark">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</Alert>
             {details}
-            <div>&nbsp;</div>
           </>;
       });
 
       const startedDate = this.props.currentGame.when;
       const startedDisplay = `${startedDate.getMonth() + 1}/${startedDate.getDate()}/${startedDate.getFullYear()}`;
 
-      let existingBets = undefined;
-      if (this.props.makeBetModal.show) {
-				const betsForBucket = this.props.betTracker.getBetsForBucket(this.props.makeBetModal.code);
-
-        if (betsForBucket) {
-          existingBets = {};
-          betsForBucket.forEach(b => {
-            existingBets[b.type] = b;
-          });
-        }
-      }
-
       currentActivity = (
-        <>
+				<>
           <Row>
             <Col>
               <Button variant="primary" onClick={() => this.rollDice()}>Roll</Button>

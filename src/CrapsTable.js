@@ -23,14 +23,19 @@ class CrapsTable extends Component {
 
   buildMappedVariants() {
 
-    let results = this.store.betBuckets.map((e) => {return { key: e.code, variant: "success"};});
+    // To build display elements, for now we only consider the 'default' option bucket
+    const filteredBuckets = this.store.betBuckets.filter( e => e.option === "default");
+
+    let results = filteredBuckets.map((e) => {
+      return { key: e.code, variant: "success"};
+    });
 
     if (this.props.currentGame && this.props.currentGame.rolls.length >= 1) {
       const lastRoll = this.props.currentGame.rolls.slice(-1)[0];
 
       const lastTotal = lastRoll.roll.total;
 
-      results = this.store.betBuckets.map((e) => {
+      results = filteredBuckets.map((e) => {
         let variant = "success";
 
         if (e.type === 'place') {
@@ -114,9 +119,11 @@ class CrapsTable extends Component {
   }
 
   getBucketClickFunction() {
-    let result = (code) => {};
+    let result = (bucket) => {};
     if (this.props.bucketClick) {
-      result = (code) => this.props.bucketClick(code);
+      result = (bucket) => {
+        this.props.bucketClick(bucket);
+      };
     }
 
     return result;
@@ -126,10 +133,10 @@ class CrapsTable extends Component {
 
     const bucketClickFunction = this.getBucketClickFunction();
 
-    let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place').map((e) => {
+    let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place' && e.option === 'default').map((e) => {
       return (
         <Button key={e.code}
-          onClick={() => bucketClickFunction(e.code)}
+          onClick={() => bucketClickFunction(e)}
           style={{fontSize: "x-large"}}
           variant={mappedVariants[e.code]}>
           {e.label}
@@ -157,7 +164,7 @@ class CrapsTable extends Component {
     if (bucket) {
       const bucketClickFunction = this.getBucketClickFunction();
 
-      result = ( <Button id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket.code)} variant={mappedVariants[bucket.code]}>
+      result = ( <Button id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
             {bucket.label}
           </Button>
           );
@@ -209,15 +216,22 @@ class CrapsTable extends Component {
           <Col xs="5">
             <Row>
               <Col xs="12">
-                <div style={{width: "1%", float: "left"}}>H A R D</div>
-                <ButtonGroup vertical style={{ height: "100%"}}>
-                  {hardWayComponents[HARD_WAYS.codeFunc("4")]}
-                  {hardWayComponents[HARD_WAYS.codeFunc("8")]}
-                </ButtonGroup>
-                <ButtonGroup vertical style={{ height: "100%"}}>
-                  {hardWayComponents[HARD_WAYS.codeFunc("6")]}
-                  {hardWayComponents[HARD_WAYS.codeFunc("10")]}
-                </ButtonGroup>
+                <div style={{width: "100%"}}>
+                  <div className="hardHornLabel">
+                    <span>H</span>
+                    <span>A</span>
+                    <span>R</span>
+                    <span>D</span>
+                  </div>
+                  <ButtonGroup vertical style={{ height: "100%"}}>
+                    {hardWayComponents[HARD_WAYS.codeFunc("4")]}
+                    {hardWayComponents[HARD_WAYS.codeFunc("8")]}
+                  </ButtonGroup>
+                  <ButtonGroup vertical style={{ height: "100%"}}>
+                    {hardWayComponents[HARD_WAYS.codeFunc("6")]}
+                    {hardWayComponents[HARD_WAYS.codeFunc("10")]}
+                  </ButtonGroup>
+                </div>
               </Col>
             </Row>
             <Row>
@@ -249,7 +263,12 @@ class CrapsTable extends Component {
             </Row>
           </Col>
           <Col xs="5">
-            <div style={{width: "1%", float: "left"}}>H O R N</div>
+            <div className="hardHornLabel">
+              <span>H</span>
+              <span>O</span>
+              <span>R</span>
+              <span>N</span>
+            </div>
             <ButtonGroup key="hornGroup-1" vertical style={{ height: "100%"}}>
               {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(2)))}
               {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(11)))}

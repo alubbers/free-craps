@@ -77,7 +77,7 @@ export const PASS = {
 };
 
 export const DONT_PASS = {
-  type: "pass",
+  type: "dontPass",
   labelFunc: val => "Don't Pass Bar",
   verboseLabelFunc: (val, opt) => `Dont't Pass ${opt === "odds" ? "Odds" : "Bar"}`,
   codeFunc: (val, opt) => `dontPass${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,
@@ -93,7 +93,7 @@ export const COME = {
 };
 
 export const DONT_COME = {
-  type: "come",
+  type: "dontCome",
   labelFunc: val => "Don't Come",
   verboseLabelFunc: (val, opt) => `Don't Come${opt === "odds" ? " Odds" : ""}`,
   codeFunc: (val, opt) => `dontCome${val ? "-" + val : ""}${opt ? "-" + opt : _DEFAULT_OPTION_SUFFIX}`,

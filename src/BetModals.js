@@ -12,7 +12,7 @@ export const BetsModal = props => {
 
   let filteredZeros = undefined;
   if (props.bets) {
-    filteredZeros = props.bets.filter( (bet) => bet.amount !== 0n );
+    filteredZeros = props.bets.filter( (bet) => { return bet.amount !== 0n });
   }
 
   if (filteredZeros && filteredZeros.length > 0) {
@@ -47,7 +47,7 @@ export const BetsModal = props => {
 
 export const MakeBetModal = props => {
 
-  const betLabel = crapsTableStore.getVerboseLabelForCode(props.modalState.code);
+  const betLabel = props.modalState.bucket?.verboseLabel ?? "";
 
   const clearOnclick = (event) => {
     props.updateCallback("0");

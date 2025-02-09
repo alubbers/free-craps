@@ -1,3 +1,13 @@
+.hardHornLabel {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100%;
+  justify-content: center;
+  vertical-align: middle;
+  padding-right: 2em;
+}
+
 #bucketButton-dontPass {
   width: 100%;
   color: black;

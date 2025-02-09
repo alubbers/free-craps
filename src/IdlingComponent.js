@@ -11,7 +11,7 @@ class IdlingComponent extends Component {
 
   render() {
     if (!this.props.activeComponentBuilder || !this.props.active) {
-      return <Spinner animation="border" variant="success" />;
+      return <Spinner key="spinner" animation="border" variant="success" />;
     }
     else {
       return this.props.activeComponentBuilder();

@@ -57,7 +57,7 @@ class BetHelper {
     let printableMappedBets = {};
     let mappedBetIds = [];
     rollFrame.activeBets.forEach( bet => {
-      const id = `${bet.bucketCode}-${bet.type}`;
+      const id = bet.bucketCode;
       mappedBets[id] = {...bet, id: id};
       printableMappedBets[id] = this.betAsJsonFriendly({...bet, id: id});
       mappedBetIds.push(id);

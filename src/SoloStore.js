@@ -25,7 +25,7 @@ class SoloStore {
 
   betsModalShowing = false;
 
-  makeBetModalBucketCode = undefined;
+  makeBetModalBucket = undefined;
 
   makeBetModalValue = undefined;
 
@@ -68,17 +68,17 @@ class SoloStore {
     const rollResult = rollUtils.roll2d6();
     const crapsResult = rollUtils.buildCrapsResult(rollResult, this.currentGame.point);
 
-    const rollFrame = {
+    let rollFrame = {
       roll: rollResult,
       crapsMeta: crapsResult,
       activeBets: bets
     };
 
-    this.currentGame.rolls.push(rollFrame);
-
     this.lastBetResult = betHelper.buildBetResults(rollFrame);
 
-    console.log(`There were ${this.lastBetResult.winners.length} winning bets`);
+    rollFrame.betResult = this.lastBetResult;
+
+    this.currentGame.rolls.push(rollFrame);
 
     if (crapsResult.newPoint !== -1) {
       this.currentGame.point = crapsResult.newPoint;
@@ -92,7 +92,7 @@ class SoloStore {
   betMade() {
     this.ready = false;
 
-    this.betTracker.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucketCode);
+    this.betTracker.makeBet(BigInt(this.makeBetModalValue), this.makeBetModalBucket.groupCode, this.makeBetModalBucket.option);
 
     this.ready = true;
   }
@@ -105,17 +105,18 @@ class SoloStore {
     this.betsModalShowing = false;
   }
 
-  showMakeBetModal(bucketCode) {
+  showMakeBetModal(bucket) {
 	  this.ready = false;
 
-    if (bucketCode === undefined) {
-      console.warn("Attempting to show the make bet modal with an undefined bucketCode is a no-op");
+    if (bucket === undefined) {
+      console.warn("Attempting to show the make bet modal with an undefined bucket is a no-op");
     }
-    this.makeBetModalBucketCode = bucketCode;
 
-    const betsForBucket = this.betTracker.getBetsForBucket(this.makeBetModalBucketCode);
-    // TODO Assume the default type of bet within a bucket
-    const betToCheck = betsForBucket.find((bet) => bet.type === "default");
+    const betsForBucket = this.betTracker.getBetsForGroup(bucket.groupCode);
+
+    const betToCheck = betsForBucket.find((bet) => bet.groupCode === bucket.groupCode && bet.option === bucket.option);
+
+    this.makeBetModalBucket = bucket;
 
     if (betToCheck) {
       this.makeBetModalValue = betToCheck.amount.toString();
@@ -127,7 +128,7 @@ class SoloStore {
   hideMakeBetModal() {
     this.ready = false;
 
-    this.makeBetModalBucketCode = undefined;
+    this.makeBetModalBucket = undefined;
     this.makeBetModalValue = undefined;
 
     this.ready = true;
