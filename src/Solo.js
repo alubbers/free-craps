@@ -6,6 +6,7 @@ import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTable from './CrapsTable';
 import CrapsTableStore from './CrapsTableStore';
+import { RollTicker } from './RollTicker';
 import { BetsModal, MakeBetModal } from './BetModals';
 import { observer } from "mobx-react"
 
@@ -89,64 +90,6 @@ class SoloView extends Component {
     let currentActivity = <div>{newGame}</div>;
 
     if (this.props.gameStarted) {
-      let rollElementList = [].concat(this.props.currentGame.rolls);
-      rollElementList.reverse();
-
-      const rollRows = rollElementList.map( (e, index) => {
-        let details = [];
-
-				// build results on bets
-				e.betResult.winners.forEach((item, i) => {
-					details.push(<Alert key={`winner-${i}`} variant="success">Bet of ${item.amount.toString()} on {this.crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} wins!!</Alert>);
-				});
-
-				e.betResult.losers.forEach((item, i) => {
-					details.push(<Alert key={`loser-${i}`} variant="danger">Bet of ${item.amount.toString()} on {this.crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} loses ...</Alert>);
-				});
-
-        if (e.crapsMeta.craps) {
-          details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger">Craps! Pass Line loses</Alert>);
-        }
-        else {
-          if (e.crapsMeta.passLineWin) {
-            details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="info">Pass Line Winner!</Alert>);
-          }
-          else {
-            if (e.crapsMeta.pointState === "POINT_SET") {
-              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="primary">New Point Set</Alert>);
-            }
-
-            if (e.crapsMeta.pointState === "POINT_HIT") {
-              details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="success">Point Hit!! Pass Line Winner!!</Alert>);
-            }
-
-            if (e.crapsMeta.pointState === "LINE_AWAY") {
-							details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="danger"><strong>Seven Line Away ...</strong></Alert>);
-            }
-          }
-
-          if (e.crapsMeta.hardWay) {
-            details.push(<Alert key={`roll-${index}-detail-${details.length}`} variant="secondary">Roll is a hard way!</Alert>);
-          }
-        }
-
-        return <>
-						<Row>
-							<Col xs="5">
-								<hr/>
-							</Col>
-							<Col xs="2" style={{padding: "0px"}}>
-								Roll {rollElementList.length - (index)}
-							</Col>
-							<Col xs="5">
-								<hr/>
-							</Col>
-						</Row>
-            <Alert key={`roll-${index}-basic`} variant="dark">You rolled a {e.roll.a} and a {e.roll.b} for a total of {e.roll.total}</Alert>
-            {details}
-          </>;
-      });
-
       const startedDate = this.props.currentGame.when;
       const startedDisplay = `${startedDate.getMonth() + 1}/${startedDate.getDate()}/${startedDate.getFullYear()}`;
 
@@ -177,7 +120,7 @@ class SoloView extends Component {
           </div>
           <Row>
             <Col>
-              {rollRows}
+              <RollTicker rolls={this.props.currentGame.rolls}/>
             </Col>
           </Row>
         </>

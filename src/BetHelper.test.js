@@ -35,6 +35,29 @@ const dontComeBet = { amount: 5n, groupCode: "dontCome", option: "default" };
 
 const hornBetFunc = (val) => { return { amount: 5n, groupCode: `horn-${val}`, option: "default" } };
 
+test("buildBetResults.win-zero-bet-no-winners", () => {
+
+  [
+    buildTestResults(undefined, [ { amount: 0n, groupCode: "pass", option: "default"} ]),
+    buildTestResults({a:5, b:2, total:7}, [ { amount: 0n, groupCode: "pass", option: "default"} ]),
+    buildTestResults({a:6, b:5, total:11}, [ { amount: 0n, groupCode: "pass", option: "default"} ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
+
+test("buildBetResults.lose-zero-bet-no-losers", () => {
+
+  [
+    buildTestResults({a:1, b:2, total:3}, [ { amount: 0n, groupCode: "pass", option: "default"} ]),
+    buildTestResults({a:1, b:1, total:2}, [ { amount: 0n, groupCode: "pass", option: "default"} ]),
+    buildTestResults({a:6, b:6, total:12}, [ { amount: 0n, groupCode: "pass", option: "default"} ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+  });
+});
 
 test("buildBetResults.win-pass-line-no-point", () => {
 
@@ -784,5 +807,169 @@ test("buildBetResults.multi-bets", () => {
       expect(winner.groupCode).toEqual('pass');
     }
   });
+});
 
+const buildHandleBetsResults = (
+    roll = { a: 3, b: 4, total: 7 },
+    incomingBets = [],
+    existingPoint = 0 ) => {
+
+      // set a bucketCode on each bet
+      const activeBets = incomingBets.map( bet => { return {...bet, bucketCode: `${bet.groupCode}-${bet.option}`};});
+
+      return betHelper.handleBetsForRoll({
+        roll: roll,
+        crapsMeta: rollUtils.buildCrapsResult(roll, existingPoint),
+        activeBets: activeBets
+      });
+   };
+
+test("handleBetsForRoll.lose-clearBet", () => {
+  [
+    buildHandleBetsResults({a:2, b:2, total:4}, [ hornBetFunc(3) ], 6),
+    buildHandleBetsResults({a:5, b:4, total:9}, [ hornBetFunc(11) ], 8),
+    buildHandleBetsResults({a:5, b:4, total:9}, [ anySevenBet ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(1);
+    expect(result.updatedBets.length).toEqual(0);
+    expect(result.payouts.length).toEqual(0);
+  });
+});
+
+test("handleBetsForRoll.win-simpleBets", () => {
+  [
+    buildHandleBetsResults({a:2, b:1, total:3}, [ hornBetFunc(3) ], 6),
+    buildHandleBetsResults({a:5, b:6, total:11}, [ hornBetFunc(11) ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('horn'));
+    expect(result.payouts[0].amount).toEqual(75n);
+  });
+
+  [
+    buildHandleBetsResults({a:2, b:1, total:2}, [ hornBetFunc(2) ]),
+    buildHandleBetsResults({a:5, b:6, total:12}, [ hornBetFunc(12) ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('horn'));
+    expect(result.payouts[0].amount).toEqual(150n);
+  });
+
+  [
+    buildHandleBetsResults({a:3, b:4, total:7}, [ anySevenBet ], 4),
+    buildHandleBetsResults({a:1, b:6, total:7}, [ anySevenBet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("anySeven-default");
+    expect(result.payouts[0].amount).toEqual(20n);
+  });
+
+  [
+    buildHandleBetsResults({a:2, b:1, total:3}, [ anyCrapsBet ], 4),
+    buildHandleBetsResults({a:6, b:6, total:12}, [ anyCrapsBet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("anyCraps-default");
+    expect(result.payouts[0].amount).toEqual(35n);
+  });
+
+  [
+    buildHandleBetsResults({a:2, b:2, total:4}, [ { amount: 5n, groupCode: "hardWay-4", option: "default"} ], 6),
+    buildHandleBetsResults({a:5, b:5, total:10}, [ { amount: 5n, groupCode: "hardWay-10", option: "default"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('hardWay'));
+    expect(result.payouts[0].amount).toEqual(35n);
+  });
+
+  [
+    buildHandleBetsResults({a:4, b:4, total:8}, [ { amount: 5n, groupCode: "hardWay-8", option: "default"} ], 6),
+    buildHandleBetsResults({a:3, b:3, total:6}, [ { amount: 5n, groupCode: "hardWay-6", option: "default"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('hardWay'));
+    expect(result.payouts[0].amount).toEqual(45n);
+  });
+});
+
+test("handleBetsForRoll.win-field", () => {
+  [
+    buildHandleBetsResults({a:2, b:1, total:3}, [ fieldBet ], 6),
+    buildHandleBetsResults({a:5, b:6, total:11}, [ fieldBet ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("field-default");
+    expect(result.payouts[0].amount).toEqual(5n);
+  });
+
+  [
+    buildHandleBetsResults({a:1, b:1, total:2}, [ fieldBet ], 4),
+    buildHandleBetsResults({a:6, b:6, total:12}, [ fieldBet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("field-default");
+    expect(result.payouts[0].amount).toEqual(10n);
+  });
+});
+
+test("handleBetsForRoll.win-place", () => {
+  [
+    buildHandleBetsResults({a:3, b:1, total:4}, [ { amount: 5n, groupCode: "place-4", option: "default"} ]),
+    buildHandleBetsResults({a:5, b:5, total:10}, [ { amount: 5n, groupCode: "place-10", option: "default"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('place'));
+    expect(result.payouts[0].amount).toEqual(9n);
+  });
+
+  [
+    buildHandleBetsResults({a:3, b:2, total:5}, [ { amount: 15n, groupCode: "place-5", option: "default"} ]),
+    buildHandleBetsResults({a:3, b:6, total:9}, [ { amount: 15n, groupCode: "place-9", option: "default"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('place'));
+    expect(result.payouts[0].amount).toEqual(21n);
+  });
+
+  [
+    buildHandleBetsResults({a:1, b:5, total:6}, [ { amount: 15n, groupCode: "place-6", option: "default"} ]),
+    buildHandleBetsResults({a:4, b:4, total:8}, [ { amount: 15n, groupCode: "place-8", option: "default"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('place'));
+    expect(result.payouts[0].amount).toEqual(17n);
+  });
+});
+
+test("handleBetsForRoll.win-c-and-e", () => {
+  [
+    buildHandleBetsResults({a:2, b:1, total:3}, [ c_and_e_Bet ], 6),
+    buildHandleBetsResults({a:6, b:6, total:12}, [ c_and_e_Bet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("c-and-e-default");
+    expect(result.payouts[0].amount).toEqual(15n);
+  });
+
+  [
+    buildHandleBetsResults({a:5, b:6, total:11}, [ c_and_e_Bet ])
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual("c-and-e-default");
+    expect(result.payouts[0].amount).toEqual(35n);
+  });
 });
