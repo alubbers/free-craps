@@ -8,10 +8,7 @@ SimplePayouts.set(HORN.codeFunc(2), 30n);
 SimplePayouts.set(HORN.codeFunc(12), 30n);
 SimplePayouts.set(ANY_SEVEN.codeFunc(), 4n);
 SimplePayouts.set(ANY_CRAPS.codeFunc(), 7n);
-SimplePayouts.set(HARD_WAYS.codeFunc(4), 7n);
-SimplePayouts.set(HARD_WAYS.codeFunc(10), 7n);
-SimplePayouts.set(HARD_WAYS.codeFunc(6), 9n);
-SimplePayouts.set(HARD_WAYS.codeFunc(8), 9n);
+
 
 /*
  * This class contains utility methods around determining wins/losses with bets
@@ -264,16 +261,26 @@ class BetHelper {
 
     let mappedWinners = [];
     let mappedLosers = [];
-    let printableMappedBets = {};
+
 
     betResults.winners.forEach( bet => {
       mappedWinners[bet.id] = bet;
-      printableMappedBets[bet.id] = this.betAsJsonFriendly(bet);
     });
 
     betResults.losers.forEach( bet => {
       mappedLosers[bet.id] = bet;
+    });
+
+    let mappedBets = {};
+    let printableMappedBets = {};
+    let mappedBetIds = [];
+
+    // filter out bets of no amount
+    rollFrame.activeBets.filter( bet => bet.amount !== 0n).forEach( bet => {
+      const id = bet.bucketCode;
+      mappedBets[id] = {...bet, id: id};
       printableMappedBets[bet.id] = this.betAsJsonFriendly(bet);
+      mappedBetIds.push(id);
     });
 
     let result = {
@@ -309,10 +316,33 @@ class BetHelper {
       });
     }
 
+    // Hard ways
+    HARD_WAYS.values.map(p => HARD_WAYS.codeFunc(p)).forEach(code => {
+      const winner = mappedWinners[code];
+      if (winner) {
+        // default the multiplier for 6 and 8, and modify otherwise
+        let multiplier = 9n;
+        if (rollTotal === 4 || rollTotal === 10) {
+          multiplier = 7n;
+        }
+
+        result.updatedBets.push(winner);
+
+        result.payouts.push({
+          code: winner.id,
+          amount: winner.amount * multiplier
+        })
+      }
+      else if (!mappedLosers[code] && mappedBets[code]) {
+        // if not a losing bet, keep the place bet in the set of new bets
+        result.updatedBets.push(mappedBets[code]);
+      }
+    });
+
     // Place bets
     POINTS.map(p => PLACE.codeFunc(p)).forEach(code => {
-      const placeWinner = mappedWinners[code];
-      if (placeWinner) {
+      const winner = mappedWinners[code];
+      if (winner) {
         // default the multiplier for 6 and 8, and modify otherwise
         let multiplier = {
           rate: 7n,
@@ -337,17 +367,16 @@ class BetHelper {
           }
         }
 
-        result.updatedBets.push(placeWinner);
-
-        // place bets are paid for each unit at the increased multiplier,
-        // and 1:1 for any remainder
-        const remainder = placeWinner.amount % multiplier.forEvery;
-        const unitsPaid = ( placeWinner.amount / multiplier.forEvery ) * multiplier.rate;
+        result.updatedBets.push(winner);
 
         result.payouts.push({
-          code: placeWinner.id,
-          amount: remainder + unitsPaid
+          code: winner.id,
+          amount: this.calculatePayoutWithMultiplier(winner.amount, multiplier)
         })
+      }
+      else if (!mappedLosers[code] && mappedBets[code]) {
+        // if not a losing bet, keep the bet in the set of new bets
+        result.updatedBets.push(mappedBets[code]);
       }
     });
 
@@ -367,11 +396,88 @@ class BetHelper {
       });
     }
 
+    const passLineOddsMultipliers = {};
+    passLineOddsMultipliers[4] = { rate: 2n, forEvery: 1n };
+    passLineOddsMultipliers[10] = { rate: 2n, forEvery: 1n };
+    passLineOddsMultipliers[5] = { rate: 3n, forEvery: 2n };
+    passLineOddsMultipliers[9] = { rate: 3n, forEvery: 2n };
+    passLineOddsMultipliers[6] = { rate: 6n, forEvery: 5n };
+    passLineOddsMultipliers[8] = { rate: 6n, forEvery: 5n };
+
+    // Handle Pass/Don't Pass
+    // For this bet, pay back the bet amounts and winnings together, and group the payout under the pass line default code
+    let passLinePayout = 0n;
+
+    const passLineWinners = [
+      { code: PASS.codeFunc(), bet: mappedWinners[PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: PASS.codeFunc(undefined, "odds"), bet: mappedWinners[PASS.codeFunc(undefined, "odds")], multiplier: passLineOddsMultipliers[rollTotal]}
+    ].forEach( winnerCheck => {
+      if (winnerCheck.bet) {
+        // pay the original bet and the winnings, since the bet will be cleared afterwards
+        passLinePayout += winnerCheck.bet.amount;
+        passLinePayout += this.calculatePayoutWithMultiplier(winnerCheck.bet.amount, winnerCheck.multiplier);
+      }
+      else if (!mappedLosers[winnerCheck.code] && mappedBets[winnerCheck.code]) {
+        // if not a losing bet, keep the place bet in the set of new bets
+        result.updatedBets.push(mappedBets[winnerCheck.code]);
+      }
+    });
+    if (passLinePayout > 0n) {
+      result.payouts.push({
+        code: PASS.codeFunc(),
+        amount: passLinePayout
+      });
+    }
+
+    // don't pass odds are the pass line odds inverted
+    const dontPassOddsMultipliers = {};
+    POINTS.forEach(p => {
+      dontPassOddsMultipliers[p] = {
+        rate: passLineOddsMultipliers[p].forEvery,
+        forEvery: passLineOddsMultipliers[p].rate
+      };
+    });
+
+    let dontPassPayout = 0n;
+
+    const dontPassWinners = [
+      { code: DONT_PASS.codeFunc(), bet: mappedWinners[DONT_PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: DONT_PASS.codeFunc(undefined, "odds"), bet: mappedWinners[DONT_PASS.codeFunc(undefined, "odds")], multiplier: dontPassOddsMultipliers[rollTotal]}
+    ].forEach( winnerCheck => {
+      if (winnerCheck.bet) {
+        // pay the original bet and the winnings, since the bet will be cleared afterwards
+        dontPassPayout += winnerCheck.bet.amount;
+        dontPassPayout += this.calculatePayoutWithMultiplier(winnerCheck.bet.amount, winnerCheck.multiplier);
+      }
+      else if (!mappedLosers[winnerCheck.code] && mappedBets[winnerCheck.code]) {
+        // if not a losing bet, keep the place bet in the set of new bets
+        result.updatedBets.push(mappedBets[winnerCheck.code]);
+      }
+    });
+    if (dontPassPayout > 0n) {
+      result.payouts.push({
+        code: DONT_PASS.codeFunc(),
+        amount: dontPassPayout
+      });
+    }
+
+
     // TODO Handle Come/Don't Come
-    
-    // TODO Handle Pass/Don't Pass
+
+
+
 
     return result;
+  }
+
+
+  calculatePayoutWithMultiplier(amount, multiplier) {
+    // bets with fractional multipliers are paid for each unit at the increased multiplier,
+    // and 1:1 for any remainder
+    const remainder = amount % multiplier.forEvery;
+    const unitsPaid = ( amount / multiplier.forEvery ) * multiplier.rate;
+
+    return unitsPaid + remainder;
   }
 
 }

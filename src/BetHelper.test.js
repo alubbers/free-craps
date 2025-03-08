@@ -953,6 +953,32 @@ test("handleBetsForRoll.win-place", () => {
   });
 });
 
+test("handleBetsForRoll.push-place", () => {
+  [
+    buildHandleBetsResults({a:3, b:5, total:8}, [ { amount: 5n, groupCode: "place-4", option: "default"} ]),
+    buildHandleBetsResults({a:5, b:1, total:6}, [ { amount: 5n, groupCode: "place-10", option: "default"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('place'));
+    expect(result.payouts.length).toEqual(0);
+  });
+
+});
+
+test("handleBetsForRoll.push-hardWays", () => {
+  [
+    buildHandleBetsResults({a:3, b:5, total:8}, [ { amount: 5n, groupCode: "hardWay-4", option: "default"} ]),
+    buildHandleBetsResults({a:5, b:1, total:6}, [ { amount: 5n, groupCode: "hardWay-10", option: "default"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets[0].id).toEqual(expect.stringMatching('hardWay'));
+    expect(result.payouts.length).toEqual(0);
+  });
+
+});
+
 test("handleBetsForRoll.win-c-and-e", () => {
   [
     buildHandleBetsResults({a:2, b:1, total:3}, [ c_and_e_Bet ], 6),
@@ -971,5 +997,79 @@ test("handleBetsForRoll.win-c-and-e", () => {
     expect(result.losers.length).toEqual(0);
     expect(result.updatedBets[0].id).toEqual("c-and-e-default");
     expect(result.payouts[0].amount).toEqual(35n);
+  });
+});
+
+test("handleBetsForRoll.win-pass-line-point-hit", () => {
+  [
+    buildHandleBetsResults({a:2, b:4, total:6}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 6),
+    buildHandleBetsResults({a:1, b:3, total:4}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 4),
+    buildHandleBetsResults({a:5, b:5, total:10}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 10),
+    buildHandleBetsResults({a:3, b:6, total:9}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 9)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(1);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(0);
+    expect(result.payouts.length).toEqual(1);
+    expect(result.payouts[0].amount.toString()).toEqual("10");
+  });
+});
+
+test("handleBetsForRoll.push-pass-line", () => {
+  [
+    buildHandleBetsResults({a:2, b:4, total:6}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 9),
+    buildHandleBetsResults({a:1, b:3, total:4}, [ { amount: 5n, groupCode: "pass", option: "default"} ], 6),
+    buildHandleBetsResults({a:5, b:5, total:10}, [ { amount: 5n, groupCode: "pass", option: "default"} ]),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(1);
+    expect(result.payouts.length).toEqual(0);
+  });
+
+  [
+    buildHandleBetsResults({a:2, b:4, total:6}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 9),
+    buildHandleBetsResults({a:1, b:3, total:4}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 6),
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(0);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(2);
+    expect(result.payouts.length).toEqual(0);
+  });
+});
+
+test("handleBetsForRoll.win-pass-line-with-odds-point-hit", () => {
+  [
+    buildHandleBetsResults({a:2, b:4, total:6}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 6),
+    buildHandleBetsResults({a:5, b:3, total:8}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 8)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(2);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(0);
+    expect(result.payouts.length).toEqual(1);
+    expect(result.payouts[0].amount.toString()).toEqual("32");
+    expect(result.payouts[0].code).toEqual("pass-default");
+  });
+
+  [
+    buildHandleBetsResults({a:2, b:3, total:5}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 5),
+    buildHandleBetsResults({a:5, b:4, total:9}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 9)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(2);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(0);
+    expect(result.payouts.length).toEqual(1);
+    expect(result.payouts[0].amount.toString()).toEqual("35");
+  });
+
+  [
+    buildHandleBetsResults({a:1, b:3, total:4}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 4),
+    buildHandleBetsResults({a:5, b:5, total:10}, [ { amount: 5n, groupCode: "pass", option: "default"}, { amount: 10n, groupCode: "pass", option: "odds"} ], 10)
+  ].forEach( result => {
+    expect(result.winners.length).toEqual(2);
+    expect(result.losers.length).toEqual(0);
+    expect(result.updatedBets.length).toEqual(0);
+    expect(result.payouts.length).toEqual(1);
+    expect(result.payouts[0].amount.toString()).toEqual("40");
   });
 });
