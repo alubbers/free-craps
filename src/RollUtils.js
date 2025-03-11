@@ -32,7 +32,8 @@ export class RollUtils {
                       pointState: a coded result with these possible values [
                              "POINT_SET", "POINT_HIT", "LINE_AWAY", "NO_CHANGE"
                            ]
-                      newPoint: -1 if no point was set, 0 if it was turned off, a valid point value otherwise
+                      newPoint: -1 if no point was set, 0 if it was turned off, a valid point value otherwise,
+                      oldPoint: the passed-in value of the point, to provide a single object with complete state information
   *               }
   */
   buildCrapsResult(roll, point = 0) {
@@ -41,7 +42,8 @@ export class RollUtils {
       passLineWin: false,
       hardWay: false,
       pointState: POINT_STATES.noChange,
-      newPoint: -1
+      newPoint: -1,
+      oldPoint: point
     };
 
     if (point === 0) {

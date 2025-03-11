@@ -404,12 +404,11 @@ class BetHelper {
     passLineOddsMultipliers[6] = { rate: 6n, forEvery: 5n };
     passLineOddsMultipliers[8] = { rate: 6n, forEvery: 5n };
 
-    // Handle Pass/Don't Pass
+    // Handle Pass Line
     // For this bet, pay back the bet amounts and winnings together, and group the payout under the pass line default code
     let passLinePayout = 0n;
 
-    const passLineWinners = [
-      { code: PASS.codeFunc(), bet: mappedWinners[PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+    [ { code: PASS.codeFunc(), bet: mappedWinners[PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
       { code: PASS.codeFunc(undefined, "odds"), bet: mappedWinners[PASS.codeFunc(undefined, "odds")], multiplier: passLineOddsMultipliers[rollTotal]}
     ].forEach( winnerCheck => {
       if (winnerCheck.bet) {
@@ -429,10 +428,46 @@ class BetHelper {
       });
     }
 
+    // Handle Come bets
+    let comeBetPayout = 0n;
+    [ { code: COME.codeFunc(), bet: mappedWinners[COME.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: COME.codeFunc(rollTotal), bet: mappedWinners[COME.codeFunc(rollTotal)], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: COME.codeFunc(rollTotal, "odds"), bet: mappedWinners[COME.codeFunc(rollTotal, "odds")], multiplier: passLineOddsMultipliers[rollTotal]},
+    ].forEach( winnerCheck => {
+      if (winnerCheck.bet) {
+        // pay the original bet and the winnings, since the bet will be cleared afterwards
+        comeBetPayout += winnerCheck.bet.amount;
+        comeBetPayout += this.calculatePayoutWithMultiplier(winnerCheck.bet.amount, winnerCheck.multiplier);
+      }
+      else if (!mappedLosers[winnerCheck.code] && mappedBets[winnerCheck.code]) {
+        // if not a winning or losing bet, check if the roll result was setting a point
+        if (POINTS.includes(rollTotal)) {
+
+          // build a new bet moving the come bet up to the new inner point
+          result.updatedBets.push({
+            ...mappedBets[winnerCheck.code],
+            groupCode: `come-${rollTotal}`,
+            bucketCode: COME.codeFunc(rollTotal)
+          });
+        }
+        else {
+          result.updatedBets.push(mappedBets[winnerCheck.code]);
+        }
+      }
+    });
+    if (comeBetPayout > 0n) {
+      result.payouts.push({
+        code: COME.codeFunc(),
+        amount: comeBetPayout
+      });
+    }
+
+
+    // Handle Don't Pas Bar
     // don't pass odds are the pass line odds inverted
     const dontPassOddsMultipliers = {};
     POINTS.forEach(p => {
-      dontPassOddsMultipliers[p] = {
+      dontPassOddsMultipliers[`${p}`] = {
         rate: passLineOddsMultipliers[p].forEvery,
         forEvery: passLineOddsMultipliers[p].rate
       };
@@ -440,9 +475,18 @@ class BetHelper {
 
     let dontPassPayout = 0n;
 
-    const dontPassWinners = [
-      { code: DONT_PASS.codeFunc(), bet: mappedWinners[DONT_PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
-      { code: DONT_PASS.codeFunc(undefined, "odds"), bet: mappedWinners[DONT_PASS.codeFunc(undefined, "odds")], multiplier: dontPassOddsMultipliers[rollTotal]}
+    /* FIXME
+    const printableDontPass = {};
+    POINTS.forEach(p => {
+      if (Object.hasOwn(dontPassOddsMultipliers, `${p}`)) {
+        const value = dontPassOddsMultipliers[`${p}`];
+        printableDontPass[`${p}`] = { rate: value.rate.toString(), forEvery: value.forEvery.toString() }
+      }
+    });
+    */
+
+    [ { code: DONT_PASS.codeFunc(), bet: mappedWinners[DONT_PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: DONT_PASS.codeFunc(undefined, "odds"), bet: mappedWinners[DONT_PASS.codeFunc(undefined, "odds")], multiplier: dontPassOddsMultipliers[`${rollFrame.crapsMeta.oldPoint}`]}
     ].forEach( winnerCheck => {
       if (winnerCheck.bet) {
         // pay the original bet and the winnings, since the bet will be cleared afterwards
@@ -462,10 +506,39 @@ class BetHelper {
     }
 
 
-    // TODO Handle Come/Don't Come
+    // Handle Dont Come bets
+    let dontComePayout = 0n;
+    [ { code: DONT_COME.codeFunc(), bet: mappedWinners[DONT_COME.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: DONT_COME.codeFunc(rollTotal), bet: mappedWinners[DONT_COME.codeFunc(rollTotal)], multiplier: { rate: 1n, forEvery: 1n } },
+      { code: DONT_COME.codeFunc(rollTotal, "odds"), bet: mappedWinners[DONT_COME.codeFunc(rollTotal, "odds")], multiplier: dontPassOddsMultipliers[`${rollFrame.crapsMeta.oldPoint}`]},
+    ].forEach( winnerCheck => {
+      if (winnerCheck.bet) {
+        // pay the original bet and the winnings, since the bet will be cleared afterwards
+        dontComePayout += winnerCheck.bet.amount;
+        dontComePayout += this.calculatePayoutWithMultiplier(winnerCheck.bet.amount, winnerCheck.multiplier);
+      }
+      else if (!mappedLosers[winnerCheck.code] && mappedBets[winnerCheck.code]) {
+        // if not a winning or losing bet, check if the roll result was setting a point
+        if (POINTS.includes(rollTotal)) {
 
-
-
+          // build a new bet moving the come bet up to the new inner point
+          result.updatedBets.push({
+            ...mappedBets[winnerCheck.code],
+            groupCode: `dontCome-${rollTotal}`,
+            bucketCode: DONT_COME.codeFunc(rollTotal)
+          });
+        }
+        else {
+          result.updatedBets.push(mappedBets[winnerCheck.code]);
+        }
+      }
+    });
+    if (dontComePayout > 0n) {
+      result.payouts.push({
+        code: DONT_COME.codeFunc(),
+        amount: dontComePayout
+      });
+    }
 
     return result;
   }
