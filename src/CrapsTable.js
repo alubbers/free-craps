@@ -1,6 +1,5 @@
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import React, { Component } from 'react';
@@ -8,9 +7,8 @@ import React, { Component } from 'react';
 import IdlingComponent from './IdlingComponent';
 import CrapsTableStore from './CrapsTableStore';
 import {PASS, DONT_PASS, COME, DONT_COME, HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
-import {POINT_STATES, RollUtils} from './RollUtils';
+import {POINT_STATES} from './RollUtils';
 
-import logo from './logo.svg';
 import './App.css';
 
 
@@ -194,6 +192,7 @@ class CrapsTable extends Component {
 
     const hardWayComponents = this.buildHardWayComponentMap(mappedVariants);
 
+    // TODO map in CSS
     let fieldTextColor = "yellow";
     if (mappedVariants["field"] === "outline-primary") {
       fieldTextColor = "#cccc00";
@@ -254,9 +253,13 @@ class CrapsTable extends Component {
               </Col>
             </Row>
             <Row>
-              <Col xs="12">
+              <Col xs="8">
                 <ButtonGroup style={{width: "100%"}}>
                   {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()))}
+                </ButtonGroup>
+              </Col>
+              <Col xs="4">
+                <ButtonGroup style={{width: "100%"}}>
                   {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()))}
                 </ButtonGroup>
               </Col>
