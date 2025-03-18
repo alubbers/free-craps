@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import {CrapsTableStore} from './CrapsTableStore';
+import PropTypes from 'prop-types';
 
 const crapsTableStore = new CrapsTableStore();
 
@@ -45,6 +46,12 @@ export const BetsModal = props => {
   );
 };
 
+BetsModal.propTypes = {
+  bets: PropTypes.array.isRequired,
+  show: PropTypes.bool.isRequired,
+  hideCallback: PropTypes.func
+};
+
 export const MakeBetModal = props => {
 
   const betLabel = props.modalState.bucket?.verboseLabel ?? "";
@@ -84,4 +91,12 @@ export const MakeBetModal = props => {
         </Modal.Footer>
     </Modal>
   );
+};
+
+MakeBetModal.propTypes = {
+  modalState: PropTypes.object.isRequired,
+  show: PropTypes.bool.isRequired,
+  updateCallback: PropTypes.func.isRequired,
+  saveCallback: PropTypes.func.isRequired,
+  hideCallback: PropTypes.func
 };

@@ -285,7 +285,7 @@ test("handleBetsForRoll.win-pass-line-with-odds-point-hit", () => {
     expect(result.updatedBets.length).toEqual(0);
     expect(result.payouts.length).toEqual(1);
     expect(result.payouts[0].amount.toString()).toEqual("32");
-    expect(result.payouts[0].code).toEqual("pass-default");
+    expect(result.payouts[0].bucketCode).toEqual("pass-default");
   });
 
   [
@@ -321,7 +321,7 @@ test("handleBetsForRoll.win-dont-pass-with-odds-line-away", () => {
     expect(result.updatedBets.length).toEqual(0);
     expect(result.payouts.length).toEqual(1);
     expect(result.payouts[0].amount.toString()).toEqual("32");
-    expect(result.payouts[0].code).toEqual("dontPass-default");
+    expect(result.payouts[0].bucketCode).toEqual("dontPass-default");
   });
 
   [
@@ -417,5 +417,45 @@ test("handleBetsForRoll.dont-come-point-set", () => {
   expect(result.payouts.length).toEqual(0);
 });
 
+test("handleBetsForRoll.multi-bets", () => {
 
-// ===================================================================
+  let multiResult = buildHandleBetsResults({a:1, b:1, total:2}, [ hornBetFunc(2), fieldBet, comeBet ]);
+
+  expect(multiResult.winners.length).toEqual(2);
+  expect(multiResult.losers.length).toEqual(1);
+  expect(multiResult.losers[0].groupCode).toEqual('come');
+  expect(multiResult.updatedBets.length).toEqual(2);
+  expect(multiResult.payouts.length).toEqual(2);
+  let payoutTotal = 0n;
+  multiResult.payouts.forEach(payout => payoutTotal += payout.amount);
+  expect(payoutTotal.toString()).toEqual("160")
+
+  multiResult = buildHandleBetsResults({a:1, b:3, total:4}, [
+    { amount: 5n, groupCode: "hardWay-4", option: "default"},
+    { amount: 5n, groupCode: "pass", option: "default"},
+    { amount: 5n, groupCode: "pass", option: "odds"},
+    fieldBet ], 4);
+
+  expect(multiResult.winners.length).toEqual(3);
+  expect(multiResult.losers.length).toEqual(1);
+
+  multiResult.winners.forEach(winner => {
+    if(winner.groupCode !== 'field') {
+      expect(winner.groupCode).toEqual('pass');
+    }
+  });
+
+  expect(multiResult.updatedBets.length).toEqual(1);
+  expect(multiResult.updatedBets[0].bucketCode).toEqual("field-default");
+
+  expect(multiResult.payouts.length).toEqual(2);
+
+  multiResult.payouts.forEach(payout => {
+    if(payout.bucketCode === 'field-default') {
+      expect(payout.amount.toString()).toEqual("5");
+    }
+    else {
+      expect(payout.amount.toString()).toEqual("25");
+    }
+  });
+});

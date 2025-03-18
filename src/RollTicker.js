@@ -14,8 +14,6 @@ export const RollTicker = props => {
   let rollElementList = [].concat(props.rolls);
   rollElementList.reverse();
 
-  console.log("RATOUT 0: Got " + rollElementList.length + " rolls");
-
   const rollRows = rollElementList.map( (e, index) => {
     let details = [];
 

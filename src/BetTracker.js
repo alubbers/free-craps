@@ -67,6 +67,25 @@ class BetTracker {
   }
 
   /**
+   * Add an amount to the bank total, typically winnings from some bet(s)
+   */
+  bankDeposit(amount) {
+    this.bank += amount;
+  }
+
+  /**
+   * A bulk operation to replace all existing bets with the incoming set.
+   * Usually used to replace bets after a roll to account for lost bets.
+   */
+  replaceBets(newBets) {
+    const removedBets = this.bets.filter( b => !newBets.some( newBet => b.bucketCode === newBet.bucketCode));
+
+    removedBets.forEach( removed => this.clearBet(removed.bucketCode));
+
+    newBets.forEach( newBet => this.makeBet(newBet.amount, newBet.groupCode, newBet.option));
+  }
+
+  /**
    * Utility method to capture as JSON since BigInts are not compatible with JSON.stringify
    */
   asJson() {

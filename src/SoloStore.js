@@ -74,7 +74,15 @@ class SoloStore {
       activeBets: bets
     };
 
-    this.lastBetResult = betHelper.buildBetResults(rollFrame);
+    this.lastBetResult = betHelper.handleBetsForRoll(rollFrame);
+
+    // update bets and bank total
+    let payoutTotal = 0n;
+    this.lastBetResult.payouts.forEach(payout => payoutTotal += payout.amount);
+
+    this.betTracker.bankDeposit(payoutTotal);
+
+    this.betTracker.replaceBets(this.lastBetResult.updatedBets);
 
     rollFrame.betResult = this.lastBetResult;
 
@@ -140,4 +148,5 @@ class SoloStore {
 
 }
 
-export default new SoloStore();
+const singleton = new SoloStore();
+export default singleton;

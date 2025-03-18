@@ -248,7 +248,7 @@ class BetHelper {
    *   updatedBets: a map of active bets that would replace the given bets
    *   payouts: an array of objects one for each winning bet
    *       {
-   *         code: the bet bucket code
+   *         bucketCode: the bet bucket code
    *         amount: winnings from the bet
    *       }
    * }
@@ -296,7 +296,7 @@ class BetHelper {
       if (simpleWinner) {
         result.updatedBets.push(simpleWinner);
         result.payouts.push({
-          code: code,
+          bucketCode: code,
           amount: simpleWinner.amount * multiplier
         });
       }
@@ -311,7 +311,7 @@ class BetHelper {
       }
       result.updatedBets.push(fieldWinner);
       result.payouts.push({
-        code: fieldWinner.id,
+        bucketCode: fieldWinner.id,
         amount: fieldWinner.amount * multiplier
       });
     }
@@ -329,7 +329,7 @@ class BetHelper {
         result.updatedBets.push(winner);
 
         result.payouts.push({
-          code: winner.id,
+          bucketCode: winner.id,
           amount: winner.amount * multiplier
         })
       }
@@ -365,12 +365,15 @@ class BetHelper {
             }
             break;
           }
+          default: {
+            throw new Error(`Should not have a place winner for a roll total of ${rollTotal}`);
+          }
         }
 
         result.updatedBets.push(winner);
 
         result.payouts.push({
-          code: winner.id,
+          bucketCode: winner.id,
           amount: this.calculatePayoutWithMultiplier(winner.amount, multiplier)
         })
       }
@@ -391,7 +394,7 @@ class BetHelper {
       }
       result.updatedBets.push(cAndEWinner);
       result.payouts.push({
-        code: cAndEWinner.id,
+        bucketCode: cAndEWinner.id,
         amount: cAndEWinner.amount * multiplier
       });
     }
@@ -423,7 +426,7 @@ class BetHelper {
     });
     if (passLinePayout > 0n) {
       result.payouts.push({
-        code: PASS.codeFunc(),
+        bucketCode: PASS.codeFunc(),
         amount: passLinePayout
       });
     }
@@ -457,7 +460,7 @@ class BetHelper {
     });
     if (comeBetPayout > 0n) {
       result.payouts.push({
-        code: COME.codeFunc(),
+        bucketCode: COME.codeFunc(),
         amount: comeBetPayout
       });
     }
@@ -475,16 +478,6 @@ class BetHelper {
 
     let dontPassPayout = 0n;
 
-    /* FIXME
-    const printableDontPass = {};
-    POINTS.forEach(p => {
-      if (Object.hasOwn(dontPassOddsMultipliers, `${p}`)) {
-        const value = dontPassOddsMultipliers[`${p}`];
-        printableDontPass[`${p}`] = { rate: value.rate.toString(), forEvery: value.forEvery.toString() }
-      }
-    });
-    */
-
     [ { code: DONT_PASS.codeFunc(), bet: mappedWinners[DONT_PASS.codeFunc()], multiplier: { rate: 1n, forEvery: 1n } },
       { code: DONT_PASS.codeFunc(undefined, "odds"), bet: mappedWinners[DONT_PASS.codeFunc(undefined, "odds")], multiplier: dontPassOddsMultipliers[`${rollFrame.crapsMeta.oldPoint}`]}
     ].forEach( winnerCheck => {
@@ -500,7 +493,7 @@ class BetHelper {
     });
     if (dontPassPayout > 0n) {
       result.payouts.push({
-        code: DONT_PASS.codeFunc(),
+        bucketCode: DONT_PASS.codeFunc(),
         amount: dontPassPayout
       });
     }
@@ -535,10 +528,12 @@ class BetHelper {
     });
     if (dontComePayout > 0n) {
       result.payouts.push({
-        code: DONT_COME.codeFunc(),
+        bucketCode: DONT_COME.codeFunc(),
         amount: dontComePayout
       });
     }
+
+    // TODO Place buy and lay bets
 
     return result;
   }
