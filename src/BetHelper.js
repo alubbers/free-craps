@@ -344,10 +344,7 @@ class BetHelper {
       const winner = mappedWinners[code];
       if (winner) {
         // default the multiplier for 6 and 8, and modify otherwise
-        let multiplier = {
-          rate: 7n,
-          forEvery: 6n
-        }
+        let multiplier = {}
         switch(rollTotal) {
           case 4:
           case 10: {
@@ -362,6 +359,14 @@ class BetHelper {
             multiplier = {
               rate: 7n,
               forEvery: 5n
+            }
+            break;
+          }
+          case 6:
+          case 8: {
+            multiplier = {
+              rate: 7n,
+              forEvery: 6n
             }
             break;
           }

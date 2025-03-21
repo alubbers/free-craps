@@ -253,13 +253,9 @@ class CrapsTable extends Component {
               </Col>
             </Row>
             <Row>
-              <Col xs="8">
+              <Col>
                 <ButtonGroup style={{width: "100%"}}>
                   {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()))}
-                </ButtonGroup>
-              </Col>
-              <Col xs="4">
-                <ButtonGroup style={{width: "100%"}}>
                   {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()))}
                 </ButtonGroup>
               </Col>

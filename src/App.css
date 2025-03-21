@@ -8,17 +8,21 @@
   padding-right: 2em;
 }
 
-#bucketButton-dontPass {
+#bucketButton-dontPass-default {
   width: 100%;
   color: black;
 }
 
-#bucketButton-field {
+#bucketButton-field-default {
   width: 100%;
   color: #cccc00;
 }
 
-#bucketButton-c-and-e, #bucketButton-anySeven, #bucketButton-pass {
+#bucketButton-field-default.btn-outline-primary {
+  color: orange;
+}
+
+#bucketButton-c-and-e-default, #bucketButton-anySeven-default, #bucketButton-pass-default {
   width: 100%;
 }
 

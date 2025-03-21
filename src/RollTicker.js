@@ -19,7 +19,12 @@ export const RollTicker = props => {
 
     // build results on bets
     e.betResult.winners.forEach((item, i) => {
-      details.push(<Alert key={`winner-${i}`} variant="success">Bet of ${item.amount.toString()} on {crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} wins!!</Alert>);
+      // find the winning amount.  Some bets have their winnings collapsed ( pass line and odds ), so not every winning bet will have a payout
+      let payout = e.betResult.payouts.find( p => p.bucketCode === item.bucketCode);
+
+      if (payout) {
+        details.push(<Alert key={`winner-${i}`} variant="success">Bet on {crapsTableStore?.getVerboseLabelForCode(item.bucketCode)} wins ${payout.amount.toString()}!!</Alert>);
+      }
     });
 
     e.betResult.losers.forEach((item, i) => {
@@ -75,9 +80,9 @@ export const RollTicker = props => {
     lastRoll = rollRows.shift();
   }
 
-  return (
-    <div>
-      {lastRoll}
+  let pastRolls = null;
+  if (rollRows.length > 0) {
+    pastRolls = (
       <Accordion>
         <Accordion.Item eventKey="pastRolls">
           <Accordion.Header>Past Rolls</Accordion.Header>
@@ -86,6 +91,13 @@ export const RollTicker = props => {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+    );
+  }
+
+  return (
+    <div>
+      {lastRoll}
+      {pastRolls}
     </div>
   );
 
