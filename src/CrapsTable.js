@@ -192,12 +192,6 @@ class CrapsTable extends Component {
 
     const hardWayComponents = this.buildHardWayComponentMap(mappedVariants);
 
-    // TODO map in CSS
-    let fieldTextColor = "yellow";
-    if (mappedVariants["field"] === "outline-primary") {
-      fieldTextColor = "#cccc00";
-    }
-
     const component = <>
         <Row xs="3" className="crapsTable">
           <Col xs="7">
