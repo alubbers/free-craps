@@ -8,6 +8,7 @@ import IdlingComponent from './IdlingComponent';
 import CrapsTableStore from './CrapsTableStore';
 import {PASS, DONT_PASS, COME, DONT_COME, HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
 import {POINT_STATES} from './RollUtils';
+import PropTypes from 'prop-types';
 
 import './App.css';
 
@@ -22,7 +23,15 @@ class CrapsTable extends Component {
   buildMappedVariants() {
 
     // To build display elements, for now we only consider the 'default' option bucket
-    const filteredBuckets = this.store.betBuckets.filter( e => e.option === "default");
+    const filteredBuckets = this.store.betBuckets.filter( e => {
+      if (e.option === "default") {
+        return true;
+      }
+      else {
+        // return default and odds bets for the pass line
+        return e.type === "pass" || e.type === "dontPass";
+      }
+    });
 
     let results = filteredBuckets.map((e) => {
       return { key: e.code, variant: "success"};
@@ -52,8 +61,8 @@ class CrapsTable extends Component {
             variant = "dark";
           }
         }
-        else if (e.type === 'pass') {
-          if (e.code === 'dontPass') {
+        else if (e.type === 'pass' || e.type === 'dontPass') {
+          if (e.type === 'dontPass') {
             if (lastRoll.crapsMeta.craps) {
               variant = "outline-primary";
 
@@ -68,7 +77,7 @@ class CrapsTable extends Component {
             }
           }
 
-          if (e.code === 'pass') {
+          if (e.type === 'pass') {
             if (lastRoll.crapsMeta.passLineWin) {
               variant = "outline-primary";
             }
@@ -156,16 +165,44 @@ class CrapsTable extends Component {
     }
   }
 
-  buildBucketButton(mappedVariants, bucket) {
+  buildBucketButton(mappedVariants, bucket, colSize) {
     let result = <></>;
 
     if (bucket) {
       const bucketClickFunction = this.getBucketClickFunction();
 
-      result = ( <Button id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
-            {bucket.label}
-          </Button>
-          );
+      let buttonText = bucket.label;
+      let buttonEnabled = true;
+      if (bucket.option === "odds") {
+        buttonText = "Odds";
+
+        let oddsEnabled = {
+          pass: false,
+          dontPass: false
+        };
+
+        if (this.props.oddsEnabled) {
+          oddsEnabled = this.props.oddsEnabled;
+        }
+
+        buttonEnabled = oddsEnabled[bucket.type];
+        console.log("RATOUT: buttonEnabled is " + buttonEnabled + " for bucket: " + bucket.code);
+      }
+
+
+      if (colSize) {
+        result = ( <Button disabled={!buttonEnabled} xs={colSize} id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
+              {buttonText}
+            </Button>
+            );
+      }
+      else {
+        result = ( <Button disabled={!buttonEnabled} id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
+              {buttonText}
+            </Button>
+            );
+      }
+
     }
 
     return result;
@@ -249,8 +286,10 @@ class CrapsTable extends Component {
             <Row>
               <Col>
                 <ButtonGroup style={{width: "100%"}}>
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()))}
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()))}
+                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()), "4")}
+                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc(undefined, "odds")), "2")}
+                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()), "4")}
+                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc(undefined, "odds")), "2")}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -281,6 +320,12 @@ class CrapsTable extends Component {
   render() {
     return <IdlingComponent active={true} activeComponentBuilder={() => this.buildActiveBody()} />;
   }
+}
+
+CrapsTable.propTypes = {
+  currentGame: PropTypes.object.isRequired,
+  bucketClick: PropTypes.func,
+  oddsEnabled: PropTypes.object
 }
 
 export default CrapsTable;

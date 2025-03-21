@@ -5,6 +5,10 @@ import { RollUtils } from "./RollUtils";
 import BetTracker from "./BetTracker";
 import BetHelper from "./BetHelper";
 
+import {
+  PASS, DONT_PASS
+} from './CrapsConstants';
+
 const rollUtils = new RollUtils();
 
 const betHelper = new BetHelper();
@@ -54,6 +58,24 @@ class SoloStore {
     this.gameStarted = true;
 
     this.ready = true;
+  }
+
+  getOddsEnabled() {
+    let oddsEnabled = {
+      pass: false,
+      dontPass: false
+    };
+
+    if (this.currentGame.point !== 0) {
+      if (this.betTracker.getBetsForGroup(PASS.type)?.length > 0) {
+        oddsEnabled.pass = true;
+      }
+      if (this.betTracker.getBetsForGroup(DONT_PASS.type)?.length > 0) {
+        oddsEnabled.dontPass = true;
+      }
+    }
+
+    return oddsEnabled;
   }
 
   doRoll() {

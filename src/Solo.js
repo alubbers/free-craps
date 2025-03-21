@@ -114,7 +114,7 @@ class SoloView extends Component {
             saveCallback={() => this.makeBet()}
             updateCallback={(amount) => this.updateMakeBetValue(amount)}
             modalState={this.props.makeBetModal}/>
-          <CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame}/>
+					<CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame} oddsEnabled={this.store.getOddsEnabled()}/>
           <div>
 						<span>Cash: ${this.props.betTracker.bank.toString()}</span>
           </div>

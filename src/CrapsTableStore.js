@@ -14,7 +14,7 @@ export class CrapsTableStore {
       this.betBuckets.push({
         type: meta.type,
         label: meta.labelFunc(),
-        verboseLabel: meta.verboseLabelFunc(undefined, "default"),
+        verboseLabel: meta.verboseLabelFunc(),
         code: meta.codeFunc(),
         groupCode: meta.type,
         option: "default"
@@ -28,8 +28,8 @@ export class CrapsTableStore {
         this.betBuckets.push({
           type: meta.type,
           label: meta.labelFunc(),
-          verboseLabel: meta.verboseLabelFunc(undefined, "default"),
-          code: meta.codeFunc(),
+          verboseLabel: meta.verboseLabelFunc(undefined, option),
+          code: meta.codeFunc(undefined, option),
           groupCode: meta.type,
           option: option
         });
@@ -71,7 +71,7 @@ export class CrapsTableStore {
       this.betBuckets.push({
         type: meta.type,
         label: meta.labelFunc(),
-        verboseLabel: meta.verboseLabelFunc(undefined, "default"),
+        verboseLabel: meta.verboseLabelFunc(),
         code: meta.codeFunc(),
         groupCode: meta.type,
         option: "default"
@@ -82,7 +82,7 @@ export class CrapsTableStore {
           this.betBuckets.push({
             type: meta.type,
             label: meta.labelFunc(val, option),
-            verboseLabel: meta.verboseLabelFunc(val, "default"),
+            verboseLabel: meta.verboseLabelFunc(val, option),
             code: meta.codeFunc(val, option),
             groupCode: `${meta.type}-${val}`,
             option: option
