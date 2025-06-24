@@ -1,40 +1,46 @@
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import React, { Component } from 'react';
+import PropTypes from "prop-types";
+import { Component } from "react";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
-import IdlingComponent from './IdlingComponent';
-import CrapsTableStore from './CrapsTableStore';
-import {PASS, DONT_PASS, COME, DONT_COME, HARD_WAYS, HORN, ANY_CRAPS, C_AND_E, FIELD, ANY_SEVEN} from './CrapsConstants';
-import {POINT_STATES} from './RollUtils';
-import PropTypes from 'prop-types';
+import { ChipStack } from "./ChipStack";
+import {
+  ANY_CRAPS,
+  ANY_SEVEN,
+  C_AND_E,
+  DONT_PASS,
+  FIELD,
+  HARD_WAYS,
+  HORN,
+  PASS,
+} from "./CrapsConstants";
+import CrapsTableStore from "./CrapsTableStore";
+import IdlingComponent from "./IdlingComponent";
+import { POINT_STATES } from "./RollUtils";
 
-import './App.css';
-
+import "./App.css";
 
 class CrapsTable extends Component {
-
   constructor() {
     super();
     this.store = new CrapsTableStore();
   }
 
   buildMappedVariants() {
-
     // To build display elements, for now we only consider the 'default' option bucket
-    const filteredBuckets = this.store.betBuckets.filter( e => {
+    const filteredBuckets = this.store.betBuckets.filter((e) => {
       if (e.option === "default") {
         return true;
-      }
-      else {
+      } else {
         // return default and odds bets for the pass line
         return e.type === "pass" || e.type === "dontPass";
       }
     });
 
     let results = filteredBuckets.map((e) => {
-      return { key: e.code, variant: "success"};
+      return { key: e.code, variant: "success" };
     });
 
     if (this.props.currentGame && this.props.currentGame.rolls.length >= 1) {
@@ -45,24 +51,22 @@ class CrapsTable extends Component {
       results = filteredBuckets.map((e) => {
         let variant = "success";
 
-        if (e.type === 'place') {
-          if (lastTotal + '' === e.label) {
+        if (e.type === "place") {
+          if (lastTotal + "" === e.label) {
             if (lastRoll.crapsMeta.pointState === POINT_STATES.pointSet) {
               variant = "outline-dark";
-            }
-            else if (lastRoll.crapsMeta.pointState === POINT_STATES.pointHit) {
+            } else if (
+              lastRoll.crapsMeta.pointState === POINT_STATES.pointHit
+            ) {
               variant = "outline-success";
-            }
-            else {
+            } else {
               variant = "outline-primary";
             }
-          }
-          else if (this.props.currentGame.point + '' === e.label) {
+          } else if (this.props.currentGame.point + "" === e.label) {
             variant = "dark";
           }
-        }
-        else if (e.type === 'pass' || e.type === 'dontPass') {
-          if (e.type === 'dontPass') {
+        } else if (e.type === "pass" || e.type === "dontPass") {
+          if (e.type === "dontPass") {
             if (lastRoll.crapsMeta.craps) {
               variant = "outline-primary";
 
@@ -77,7 +81,7 @@ class CrapsTable extends Component {
             }
           }
 
-          if (e.type === 'pass') {
+          if (e.type === "pass") {
             if (lastRoll.crapsMeta.passLineWin) {
               variant = "outline-primary";
             }
@@ -86,13 +90,11 @@ class CrapsTable extends Component {
               variant = "outline-primary";
             }
           }
-        }
-        else if (e.type === HARD_WAYS.type) {
-          if (lastTotal + '' === e.label) {
+        } else if (e.type === HARD_WAYS.type) {
+          if (lastTotal + "" === e.label) {
             if (lastRoll.crapsMeta.hardWay) {
               variant = "outline-primary";
-            }
-            else {
+            } else {
               variant = "outline-danger";
             }
           }
@@ -102,8 +104,8 @@ class CrapsTable extends Component {
           variant = "outline-primary";
         }
 
-        let groupedZones = [ANY_SEVEN, ANY_CRAPS, C_AND_E, FIELD]
-        groupedZones.forEach(betZone => {
+        let groupedZones = [ANY_SEVEN, ANY_CRAPS, C_AND_E, FIELD];
+        groupedZones.forEach((betZone) => {
           if (e.type === betZone.type) {
             if (betZone.values.includes(lastTotal)) {
               variant = "outline-primary";
@@ -113,14 +115,14 @@ class CrapsTable extends Component {
 
         return {
           key: e.code,
-          variant: variant
+          variant: variant,
         };
       });
     }
 
     let mappedVariants = {};
 
-    results.forEach(e => mappedVariants[e.key] = e.variant);
+    results.forEach((e) => (mappedVariants[e.key] = e.variant));
 
     return mappedVariants;
   }
@@ -137,19 +139,31 @@ class CrapsTable extends Component {
   }
 
   buildPlaceBetComponents(mappedVariants) {
-
     const bucketClickFunction = this.getBucketClickFunction();
 
-    let setOneBuckets = this.store.betBuckets.filter( e => e.type === 'place' && e.option === 'default').map((e) => {
-      return (
-        <Button key={e.code}
-          onClick={() => bucketClickFunction(e)}
-          style={{fontSize: "x-large"}}
-          variant={mappedVariants[e.code]}>
-          {e.label}
-        </Button>
-      );
-    });
+    let setOneBuckets = this.store.betBuckets
+      .filter((e) => e.type === "place" && e.option === "default")
+      .map((e) => {
+        let coin = <></>;
+        if (this.props.betTracker) {
+          let existingBet = this.props.betTracker.getBetForBucketCode(e.code);
+          if (existingBet) {
+            coin = <ChipStack amount={Number(existingBet.amount)} />;
+          }
+        }
+
+        return (
+          <Button
+            key={e.code}
+            onClick={() => bucketClickFunction(e)}
+            style={{ fontSize: "x-large" }}
+            variant={mappedVariants[e.code]}
+          >
+            {e.label}
+            {coin}
+          </Button>
+        );
+      });
 
     let setTwoBuckets = [];
 
@@ -160,9 +174,13 @@ class CrapsTable extends Component {
     setTwoBuckets.reverse();
 
     return {
-      setOne: (<ButtonGroup style={{width: "100%"}}>{setOneBuckets}</ButtonGroup>),
-      setTwo: (<ButtonGroup style={{width: "100%"}}>{setTwoBuckets}</ButtonGroup>)
-    }
+      setOne: (
+        <ButtonGroup style={{ width: "100%" }}>{setOneBuckets}</ButtonGroup>
+      ),
+      setTwo: (
+        <ButtonGroup style={{ width: "100%" }}>{setTwoBuckets}</ButtonGroup>
+      ),
+    };
   }
 
   buildBucketButton(mappedVariants, bucket, colSize) {
@@ -178,7 +196,7 @@ class CrapsTable extends Component {
 
         let oddsEnabled = {
           pass: false,
-          dontPass: false
+          dontPass: false,
         };
 
         if (this.props.oddsEnabled) {
@@ -186,23 +204,46 @@ class CrapsTable extends Component {
         }
 
         buttonEnabled = oddsEnabled[bucket.type];
-        console.log("RATOUT: buttonEnabled is " + buttonEnabled + " for bucket: " + bucket.code);
       }
 
+      let coin = <></>;
+      if (this.props.betTracker) {
+        const existingBet = this.props.betTracker.getBetForBucketCode(
+          bucket.code,
+        );
+        if (existingBet) {
+          coin = <ChipStack amount={Number(existingBet.amount)} />;
+        }
+      }
 
       if (colSize) {
-        result = ( <Button disabled={!buttonEnabled} xs={colSize} id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
-              {buttonText}
-            </Button>
-            );
+        result = (
+          <Button
+            disabled={!buttonEnabled}
+            xs={colSize}
+            id={"bucketButton-" + bucket.code}
+            key={bucket.code}
+            onClick={() => bucketClickFunction(bucket)}
+            variant={mappedVariants[bucket.code]}
+          >
+            {buttonText}
+            {coin}
+          </Button>
+        );
+      } else {
+        result = (
+          <Button
+            disabled={!buttonEnabled}
+            id={"bucketButton-" + bucket.code}
+            key={bucket.code}
+            onClick={() => bucketClickFunction(bucket)}
+            variant={mappedVariants[bucket.code]}
+          >
+            {buttonText}
+            {coin}
+          </Button>
+        );
       }
-      else {
-        result = ( <Button disabled={!buttonEnabled} id={"bucketButton-" + bucket.code} key={bucket.code} onClick={() => bucketClickFunction(bucket)} variant={mappedVariants[bucket.code]}>
-              {buttonText}
-            </Button>
-            );
-      }
-
     }
 
     return result;
@@ -222,42 +263,40 @@ class CrapsTable extends Component {
   }
 
   buildActiveBody() {
-
     let mappedVariants = this.buildMappedVariants();
 
     const placeBetButtonGroups = this.buildPlaceBetComponents(mappedVariants);
 
     const hardWayComponents = this.buildHardWayComponentMap(mappedVariants);
 
-    const component = <>
+    const component = (
+      <>
         <Row xs="3" className="crapsTable">
           <Col xs="7">
             <Row>
-              <Col>
-                {placeBetButtonGroups.setOne}
-              </Col>
-              <Col>
-                {placeBetButtonGroups.setTwo}
-              </Col>
+              <Col>{placeBetButtonGroups.setOne}</Col>
+              <Col>{placeBetButtonGroups.setTwo}</Col>
             </Row>
-            <Button style={{width: "100%", color: "red"}} variant="success">COME</Button>
+            <Button style={{ width: "100%", color: "red" }} variant="success">
+              COME
+            </Button>
           </Col>
 
           <Col xs="5">
             <Row>
               <Col xs="12">
-                <div style={{width: "100%"}}>
+                <div style={{ width: "100%" }}>
                   <div className="hardHornLabel">
                     <span>H</span>
                     <span>A</span>
                     <span>R</span>
                     <span>D</span>
                   </div>
-                  <ButtonGroup vertical style={{ height: "100%"}}>
+                  <ButtonGroup vertical style={{ height: "100%" }}>
                     {hardWayComponents[HARD_WAYS.codeFunc("4")]}
                     {hardWayComponents[HARD_WAYS.codeFunc("8")]}
                   </ButtonGroup>
-                  <ButtonGroup vertical style={{ height: "100%"}}>
+                  <ButtonGroup vertical style={{ height: "100%" }}>
                     {hardWayComponents[HARD_WAYS.codeFunc("6")]}
                     {hardWayComponents[HARD_WAYS.codeFunc("10")]}
                   </ButtonGroup>
@@ -267,8 +306,14 @@ class CrapsTable extends Component {
             <Row>
               <Col xs="12">
                 <ButtonGroup>
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(C_AND_E.codeFunc()))}
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(ANY_SEVEN.codeFunc()))}
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(C_AND_E.codeFunc()),
+                  )}
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(ANY_SEVEN.codeFunc()),
+                  )}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -278,18 +323,41 @@ class CrapsTable extends Component {
           <Col xs="7">
             <Row>
               <Col>
-                <ButtonGroup style={{width: "100%"}}>
-                  {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(FIELD.codeFunc()))}
+                <ButtonGroup style={{ width: "100%" }}>
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(FIELD.codeFunc()),
+                  )}
                 </ButtonGroup>
               </Col>
             </Row>
             <Row>
               <Col>
-                <ButtonGroup style={{width: "100%"}}>
-                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc()), "4")}
-                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(PASS.codeFunc(undefined, "odds")), "2")}
-                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc()), "4")}
-                    {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(DONT_PASS.codeFunc(undefined, "odds")), "2")}
+                <ButtonGroup style={{ width: "100%" }}>
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(PASS.codeFunc()),
+                    "4",
+                  )}
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(
+                      PASS.codeFunc(undefined, "odds"),
+                    ),
+                    "2",
+                  )}
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(DONT_PASS.codeFunc()),
+                    "4",
+                  )}
+                  {this.buildBucketButton(
+                    mappedVariants,
+                    this.store.getBucketForCode(
+                      DONT_PASS.codeFunc(undefined, "odds"),
+                    ),
+                    "2",
+                  )}
                 </ButtonGroup>
               </Col>
             </Row>
@@ -301,31 +369,49 @@ class CrapsTable extends Component {
               <span>R</span>
               <span>N</span>
             </div>
-            <ButtonGroup key="hornGroup-1" vertical style={{ height: "100%"}}>
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(2)))}
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(11)))}
+            <ButtonGroup key="hornGroup-1" vertical style={{ height: "100%" }}>
+              {this.buildBucketButton(
+                mappedVariants,
+                this.store.getBucketForCode(HORN.codeFunc(2)),
+              )}
+              {this.buildBucketButton(
+                mappedVariants,
+                this.store.getBucketForCode(HORN.codeFunc(11)),
+              )}
             </ButtonGroup>
-            <ButtonGroup key="hornGroup-2" vertical style={{ height: "100%"}}>
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(3)))}
-              {this.buildBucketButton(mappedVariants, this.store.getBucketForCode(HORN.codeFunc(12)))}
+            <ButtonGroup key="hornGroup-2" vertical style={{ height: "100%" }}>
+              {this.buildBucketButton(
+                mappedVariants,
+                this.store.getBucketForCode(HORN.codeFunc(3)),
+              )}
+              {this.buildBucketButton(
+                mappedVariants,
+                this.store.getBucketForCode(HORN.codeFunc(12)),
+              )}
             </ButtonGroup>
           </Col>
         </Row>
-      </>;
+      </>
+    );
 
     return component;
-
   }
 
   render() {
-    return <IdlingComponent active={true} activeComponentBuilder={() => this.buildActiveBody()} />;
+    return (
+      <IdlingComponent
+        active={true}
+        activeComponentBuilder={() => this.buildActiveBody()}
+      />
+    );
   }
 }
 
 CrapsTable.propTypes = {
   currentGame: PropTypes.object.isRequired,
+  betTracker: PropTypes.object,
   bucketClick: PropTypes.func,
-  oddsEnabled: PropTypes.object
-}
+  oddsEnabled: PropTypes.object,
+};
 
 export default CrapsTable;

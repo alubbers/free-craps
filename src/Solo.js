@@ -1,49 +1,50 @@
-import Alert from 'react-bootstrap/Alert';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row';
-import React, { Component } from 'react';
-import IdlingComponent from './IdlingComponent';
-import CrapsTable from './CrapsTable';
-import CrapsTableStore from './CrapsTableStore';
-import { RollTicker } from './RollTicker';
-import { BetsModal, MakeBetModal } from './BetModals';
-import { observer } from "mobx-react"
+import Alert from "react-bootstrap/Alert";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
+import React, { Component } from "react";
+import IdlingComponent from "./IdlingComponent";
+import CrapsTable from "./CrapsTable";
+import CrapsTableStore from "./CrapsTableStore";
+import { RollTicker } from "./RollTicker";
+import { BetsModal, MakeBetModal } from "./BetModals";
+import { observer } from "mobx-react";
 
-import './App.css';
+import "./App.css";
 
 const Solo = observer(({ store }) => {
-	const betsModal = {
-	  show: store.betsModalShowing,
-		bets: store.betTracker.getBets()
-	};
+  const betsModal = {
+    show: store.betsModalShowing,
+    bets: store.betTracker.getBets(),
+  };
 
-	let makeBetModal = {
-	  show: store.makeBetModalBucket !== undefined,
-		bucket: store.makeBetModalBucket,
-	  value: "0"
-	};
+  let makeBetModal = {
+    show: store.makeBetModalBucket !== undefined,
+    bucket: store.makeBetModalBucket,
+    value: "0",
+  };
 
-	if (store.makeBetModalValue !== undefined) {
-	  makeBetModal.value = store.makeBetModalValue;
-	}
+  if (store.makeBetModalValue !== undefined) {
+    makeBetModal.value = store.makeBetModalValue;
+  }
 
-	return (
-		<SoloView soloStore={store}
-          betsModal={betsModal}
-          makeBetModal={makeBetModal}
-          gameStarted={store.gameStarted}
-          storeReady={store.ready}
-          currentGame={store.currentGame}
-					betTracker={store.betTracker} />
-	);
+  return (
+    <SoloView
+      soloStore={store}
+      betsModal={betsModal}
+      makeBetModal={makeBetModal}
+      gameStarted={store.gameStarted}
+      storeReady={store.ready}
+      currentGame={store.currentGame}
+      betTracker={store.betTracker}
+    />
+  );
 });
 
 class SoloView extends Component {
-
   componentDidMount() {
     this.store = this.props.soloStore;
-		this.crapsTableStore = new CrapsTableStore();
+    this.crapsTableStore = new CrapsTableStore();
   }
 
   rollDice() {
@@ -62,8 +63,8 @@ class SoloView extends Component {
     this.store.hideBetsModal();
   }
 
-	betBucketClicked(bucket) {
-		this.store.showMakeBetModal(bucket);
+  betBucketClicked(bucket) {
+    this.store.showMakeBetModal(bucket);
   }
 
   hideMakeBetModal() {
@@ -71,7 +72,7 @@ class SoloView extends Component {
   }
 
   updateMakeBetValue(newValue) {
-  	this.store.updateMakeBetValue(newValue);
+    this.store.updateMakeBetValue(newValue);
   }
 
   makeBet() {
@@ -85,7 +86,11 @@ class SoloView extends Component {
   }
 
   buildActiveBody() {
-    const newGame = <Button variant="primary" onClick={() => this.startNewGame()}>New</Button>;
+    const newGame = (
+      <Button variant="primary" onClick={() => this.startNewGame()}>
+        New
+      </Button>
+    );
 
     let currentActivity = <div>{newGame}</div>;
 
@@ -94,33 +99,44 @@ class SoloView extends Component {
       const startedDisplay = `${startedDate.getMonth() + 1}/${startedDate.getDate()}/${startedDate.getFullYear()}`;
 
       currentActivity = (
-				<>
+        <>
           <Row>
             <Col>
-              <Button variant="primary" onClick={() => this.rollDice()}>Roll</Button>
+              <Button variant="primary" onClick={() => this.rollDice()}>
+                Roll
+              </Button>
             </Col>
             <Col>
-              <Button variant="primary" onClick={() => this.showBetsModal()}>Bets</Button>
+              <Button variant="primary" onClick={() => this.showBetsModal()}>
+                Bets
+              </Button>
             </Col>
-            <Col>
-              {newGame}
-            </Col>
+            <Col>{newGame}</Col>
           </Row>
-          <BetsModal show={this.props.betsModal.show}
+          <BetsModal
+            show={this.props.betsModal.show}
             hideCallback={() => this.hideBetsModal()}
-            bets={this.props.betsModal.bets}/>
-          <MakeBetModal show={this.props.makeBetModal.show}
+            bets={this.props.betsModal.bets}
+          />
+          <MakeBetModal
+            show={this.props.makeBetModal.show}
             hideCallback={() => this.hideMakeBetModal()}
             saveCallback={() => this.makeBet()}
             updateCallback={(amount) => this.updateMakeBetValue(amount)}
-            modalState={this.props.makeBetModal}/>
-					<CrapsTable bucketClick={(code) => this.betBucketClicked(code)} currentGame={this.props.currentGame} oddsEnabled={this.store.getOddsEnabled()}/>
+            modalState={this.props.makeBetModal}
+          />
+          <CrapsTable
+            bucketClick={(code) => this.betBucketClicked(code)}
+            currentGame={this.props.currentGame}
+            oddsEnabled={this.store.getOddsEnabled()}
+            betTracker={this.props.betTracker}
+          />
           <div>
-						<span>Cash: ${this.props.betTracker.bank.toString()}</span>
+            <span>Cash: ${this.props.betTracker.bank.toString()}</span>
           </div>
           <Row>
             <Col>
-              <RollTicker rolls={this.props.currentGame.rolls}/>
+              <RollTicker rolls={this.props.currentGame.rolls} />
             </Col>
           </Row>
         </>
@@ -131,15 +147,18 @@ class SoloView extends Component {
   }
 
   render() {
-
-    return <div className="App">
-      <div>Single Player</div>
-      <div>
-				<IdlingComponent active={this.props.storeReady} activeComponentBuilder={() => this.buildActiveBody()} />
+    return (
+      <div className="App">
+        <div>Single Player</div>
+        <div>
+          <IdlingComponent
+            active={this.props.storeReady}
+            activeComponentBuilder={() => this.buildActiveBody()}
+          />
+        </div>
       </div>
-    </div>;
+    );
   }
-
 }
 
 export default Solo;
