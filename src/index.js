@@ -5,6 +5,7 @@ import App from './App';
 import Profile from './Profile';
 import Solo from './Solo';
 import SoloStore from './SoloStore';
+import { initSecurity } from './utils/security';
 import {
   createBrowserRouter,
   RouterProvider,
@@ -24,6 +25,9 @@ const router = createBrowserRouter([
     element: <Solo store={SoloStore}/>
   }
 ]);
+
+// Initialize security features
+initSecurity();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
